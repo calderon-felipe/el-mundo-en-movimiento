@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>El mundo en movimiento — Los 5 destinos que todos eligen</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #050814;
+  --bg-alt:    #0B1020;
+  --surface:   #111827;
+  --text:      #F4F7FB;
+  --dim:       #AAB4C8;
+  --border:    rgba(255,255,255,0.10);
+  --bangkok:   #FF3B30;
+  --paris:     #00D1FF;
+  --london:    #8B5CF6;
+  --dubai:     #FFD60A;
+  --singapore: #32D74B;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 2px; }
+
+/* ── PROGRESS ── */
+#progress {
+  position: fixed; top: 0; left: 0; z-index: 1000;
+  height: 2px; width: 0%;
+  background: linear-gradient(90deg, var(--paris), var(--london));
+  transition: width 0.1s linear;
+}
+
+/* ── HERO ── */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 6rem 2rem;
+  overflow: hidden;
+}
+
+#hero-canvas { position: absolute; inset: 0; pointer-events: none; }
+
+.hero-inner { position: relative; z-index: 1; max-width: 840px; }
+
+.hero-tag {
+  display: inline-block;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--paris);
+  border: 1px solid rgba(0,209,255,0.45);
+  padding: 0.28em 0.9em; border-radius: 2px;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 900;
+  font-size: clamp(2.3rem, 5.5vw, 4.8rem);
+  line-height: 1.07;
+  margin-bottom: 1.5rem;
+  text-wrap: pretty;
+}
+
+.hero-sub {
+  font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.9;
+  max-width: 600px;
+  margin: 0 auto 3.5rem;
+}
+
+.scroll-hint {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.6rem;
+  font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--dim);
+}
+.scroll-hint::after {
+  content: '';
+  width: 1px; height: 46px;
+  background: linear-gradient(to bottom, var(--dim), transparent);
+  animation: line-drop 2s ease-in-out infinite;
+}
+@keyframes line-drop {
+  0%,100% { opacity: 0; transform: scaleY(0); transform-origin: top; }
+  40%,60%  { opacity: 1; transform: scaleY(1); }
+}
+
+/* ── INTRO · UNIVERSO 1.400M ── */
+#intro {
+  position: relative;
+  height: 430vh;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0,209,255,0.10), transparent 30%),
+    radial-gradient(circle at 82% 78%, rgba(139,92,246,0.13), transparent 42%),
+    linear-gradient(180deg, var(--bg-alt) 0%, var(--bg) 100%);
+  border-top: 1px solid var(--border);
+  overflow: visible;
+  isolation: isolate;
+}
+
+.intro-pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.intro-pin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,0.020) 1px, transparent 1px);
+  background-size: 92px 92px;
+  opacity: 0.36;
+  mask-image: radial-gradient(circle at center, black 0%, black 44%, transparent 78%);
+  pointer-events: none;
+}
+
+.intro-scene {
+  position: relative;
+  z-index: 2;
+  width: min(1120px, 94vw);
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.intro-earth-wrap {
+  position: absolute;
+  left: 50%;
+  top: 41%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 20rem;
+  height: 20rem;
+  will-change: transform, opacity, filter;
+}
+
+.intro-orbit {
+  position: absolute;
+  inset: 15%;
+  border: 1px solid rgba(0,209,255,0.26);
+  border-radius: 50%;
+  box-shadow: 0 0 42px rgba(0,209,255,0.10), inset 0 0 28px rgba(139,92,246,0.08);
+  transform: rotate(-18deg) scaleX(1.32);
+}
+
+.intro-earth {
+  position: relative;
+  z-index: 2;
+  width: clamp(5.9rem, 10.5vw, 8.8rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  transform-origin: center;
+  background:
+    radial-gradient(circle at 29% 26%, rgba(255,255,255,0.82) 0 5%, transparent 9%),
+    radial-gradient(ellipse at 40% 39%, #35d070 0 12%, transparent 13%),
+    radial-gradient(ellipse at 63% 34%, #2fc36b 0 10%, transparent 11%),
+    radial-gradient(ellipse at 51% 63%, #34c66d 0 17%, transparent 18%),
+    radial-gradient(ellipse at 72% 67%, #2aaa64 0 8%, transparent 9%),
+    linear-gradient(145deg, #3be7ff 0%, #1585dd 48%, #092d83 100%);
+  box-shadow:
+    inset -18px -22px 38px rgba(0,0,0,0.35),
+    inset 12px 14px 30px rgba(255,255,255,0.18),
+    0 0 42px rgba(0,209,255,0.30),
+    0 0 90px rgba(139,92,246,0.16);
+  filter: drop-shadow(0 0 32px rgba(0,209,255,0.28));
+}
+.intro-earth::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 48.5%, rgba(255,255,255,0.22) 49.5% 50.5%, transparent 51.5%),
+    linear-gradient(0deg, transparent 48.5%, rgba(255,255,255,0.18) 49.5% 50.5%, transparent 51.5%),
+    repeating-radial-gradient(ellipse at center, transparent 0 21%, rgba(255,255,255,0.13) 22% 22.7%, transparent 23.5% 40%);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+.intro-earth::after {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 31% 25%, rgba(255,255,255,0.36), transparent 20%, transparent 58%, rgba(0,0,0,0.36) 100%);
+  pointer-events: none;
+}
+
+/* Versión SVG: mantiene la idea de planeta, pero escala sin pixelarse */
+.intro-earth-svg {
+  display: block;
+  background: none;
+  overflow: visible;
+  box-shadow: none;
+  filter: drop-shadow(0 0 34px rgba(0,209,255,0.32)) drop-shadow(0 0 88px rgba(139,92,246,0.16));
+  transform-origin: center center;
+}
+.intro-earth-svg::before,
+.intro-earth-svg::after { content: none; }
+.intro-earth-svg .earth-land {
+  fill: #31d26f;
+  stroke: rgba(4,42,28,0.22);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+}
+.intro-earth-svg .earth-land-soft { fill: #68e087; }
+.intro-earth-svg .earth-grid {
+  fill: none;
+  stroke: rgba(255,255,255,0.22);
+  stroke-width: 1.1;
+}
+
+
+/* Opción 1: el mundo queda claro y prudente; el número es el que toma escala */
+.intro-earth-emoji {
+  display: block;
+  width: auto;
+  aspect-ratio: auto;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+  font-size: clamp(5.6rem, 10vw, 8.4rem);
+  line-height: 1;
+  filter: drop-shadow(0 0 30px rgba(0,209,255,0.34)) drop-shadow(0 0 78px rgba(139,92,246,0.16));
+  transform-origin: center center;
+  will-change: transform, filter;
+}
+.intro-earth-emoji::before,
+.intro-earth-emoji::after { content: none; }
+.intro-count { display: block; transform-origin: center center; will-change: transform, opacity, filter; }
+
+.intro-count-block {
+  position: absolute;
+  left: 50%;
+  top: 67%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 92vw);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.intro-kicker {
+  display: inline-block;
+  margin-bottom: 0.85rem;
+  padding: 0.28em 0.9em;
+  border-radius: 999px;
+  border: 1px solid rgba(0,209,255,0.34);
+  background: rgba(0,209,255,0.055);
+  color: var(--paris);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.intro-count {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(3.6rem, 11vw, 9rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+  color: var(--text);
+  text-shadow: 0 0 40px rgba(0,209,255,0.18);
+}
+
+.intro-count-label {
+  margin: 0.95rem auto 0;
+  max-width: 620px;
+  color: var(--dim);
+  font-size: clamp(0.95rem, 1.35vw, 1.1rem);
+  line-height: 1.55;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.intro-final {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 5;
+  transform: translate(-50%, -50%) scale(0.82);
+  width: min(1120px, 96vw);
+  padding: 1.2rem 0 1.9rem;
+  opacity: 0;
+  overflow: visible;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+}
+
+.intro-final-number {
+  display: block;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(4.9rem, 14.2vw, 12.8rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.058em;
+  white-space: nowrap;
+  padding: 0.06em 0.03em 0.12em;
+  background: linear-gradient(130deg, var(--paris) 12%, var(--london) 58%, var(--bangkok) 105%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 38px rgba(0,209,255,0.16));
+}
+
+.intro-final-label {
+  margin-top: 1.2rem;
+  color: var(--text);
+  font-size: clamp(1.05rem, 1.9vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.intro-final-sub {
+  margin: 0.55rem auto 0;
+  max-width: 660px;
+  color: var(--dim);
+  font-size: clamp(0.95rem, 1.25vw, 1.08rem);
+  line-height: 1.7;
+}
+
+.intro-shockwave {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  border: 2px solid rgba(0,209,255,0.45);
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 0 60px rgba(0,209,255,0.20), inset 0 0 45px rgba(139,92,246,0.16);
+}
+
+
+/* En esta versión no vuelan números: la explosión es limpia y el único elemento que sale disparado es el mundo. */
+.intro-sparks { display: none !important; }
+
+.intro-spark {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: var(--paris);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 18px currentColor;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+}
+.intro-spark:nth-child(odd) { color: var(--london); }
+.intro-spark:nth-child(3n) { color: var(--bangkok); }
+.intro-spark:nth-child(4n) { color: var(--dubai); }
+
+.intro-photo-gate {
+  position: absolute;
+  left: 50%;
+  bottom: 6.5vh;
+  z-index: 4;
+  width: min(1040px, 92vw);
+  height: clamp(135px, 22vh, 220px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  transform: translate(-50%, 30vh) scale(0.98);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.intro-photo-gate::before {
+  content: '';
+  position: absolute;
+  inset: -2rem -3rem;
+  background: radial-gradient(circle at center, rgba(0,209,255,0.16), transparent 62%);
+  filter: blur(14px);
+  z-index: -1;
+}
+
+.intro-photo-strip {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background-size: cover;
+  background-position: center;
+  min-height: 100%;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+}
+
+.intro-photo-strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(5,8,20,0.72));
+}
+
+.intro-handoff {
+  position: absolute;
+  left: 50%;
+  bottom: 3.6vh;
+  z-index: 6;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  width: min(720px, 90vw);
+  text-align: center;
+  color: var(--dim);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+#city-parallax {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 -50px 120px rgba(0,0,0,0.46);
+}
+
+#city-parallax::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -22vh;
+  height: 28vh;
+  background: linear-gradient(180deg, transparent, var(--bg-alt));
+  pointer-events: none;
+}
+
+.giant {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(5rem, 14vw, 11rem);
+  font-weight: 900; line-height: 1;
+  background: linear-gradient(130deg, var(--paris) 20%, var(--london) 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.giant-label {
+  font-size: clamp(0.95rem, 2vw, 1.2rem);
+  color: var(--dim); max-width: 480px; line-height: 1.7;
+}
+
+@media (max-width: 700px) {
+  #intro { height: 400vh; }
+  .intro-earth-wrap { top: 39%; width: 14rem; height: 14rem; }
+  .intro-earth { width: clamp(5.2rem, 24vw, 7.2rem); }
+  .intro-count-block { top: 68%; }
+  .intro-photo-gate { gap: 0.45rem; width: 94vw; height: 17vh; bottom: 7vh; }
+  .intro-photo-strip { border-radius: 12px; }
+  .intro-final { width: min(96vw, 740px); top: 45%; }
+  .intro-final-number { font-size: clamp(4rem, 18vw, 7.5rem); letter-spacing: -0.05em; }
+}
+
+/* ── SECTIONS ── */
+.section {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 5vw;
+  align-items: start;
+  min-height: 90vh;
+  padding: 9rem 7vw;
+  border-top: 1px solid var(--border);
+}
+
+.section:nth-of-type(even) { background: var(--bg-alt); }
+
+.s-text {
+  position: sticky;
+  top: 24vh;
+}
+
+.s-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem; font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1; margin-bottom: 0.6rem;
+  user-select: none;
+}
+
+.s-tag {
+  font-size: 0.67rem; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--paris); margin-bottom: 0.6rem;
+}
+
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 2.4vw, 2.25rem);
+  font-weight: 700; line-height: 1.18;
+  margin-bottom: 1.1rem; text-wrap: pretty;
+}
+
+.s-body {
+  font-size: 0.96rem; color: var(--dim);
+  line-height: 1.88; text-wrap: pretty;
+}
+
+.s-body em { color: var(--text); font-style: normal; font-weight: 500; }
+
+.callout {
+  margin-top: 1.4rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0,209,255,0.08);
+  border-left: 2px solid var(--paris);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.82rem; color: var(--dim); line-height: 1.6;
+}
+
+/* ── VIZ BOXES ── */
+.chart-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.6rem;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.chart-box.in { opacity: 1; transform: none; }
+
+.box-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 1.2rem;
+}
+
+/* ── MAP ── */
+#world-svg { width: 100%; height: auto; display: block; }
+
+#map-tip {
+  position: fixed; z-index: 999;
+  background: rgba(8,12,18,0.96);
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem; color: var(--text);
+  pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+/* ── ORIGINS ── */
+.origins-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.o-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.1rem;
+  opacity: 0; transform: translateY(12px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.o-card.in { opacity: 1; transform: none; }
+
+.o-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
+
+.o-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.o-city-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.92rem; font-weight: 700;
+}
+
+.o-row { margin-bottom: 0.52rem; }
+
+.o-row-top {
+  display: flex; justify-content: space-between;
+  font-size: 0.79rem; color: var(--dim);
+  margin-bottom: 0.22rem;
+}
+
+.o-pct { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.o-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; }
+
+.o-fill { height: 100%; border-radius: 2px; width: 0%; transition: width 0.85s cubic-bezier(.4,0,.2,1); }
+
+/* ── CLOSING ── */
+#closing {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  padding: 9rem 5vw;
+  text-align: center;
+}
+
+.closing-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700; margin-bottom: 0.7rem;
+}
+
+.closing-sub { color: var(--dim); font-size: 1rem; margin-bottom: 3.5rem; }
+
+.city-cards {
+  display: flex; flex-wrap: wrap;
+  gap: 1.2rem; justify-content: center;
+  margin-bottom: 4.5rem;
+}
+
+.c-card {
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 1.75rem 1.4rem; text-align: center;
+  min-width: 145px; flex: 1; max-width: 175px;
+}
+
+.c-card-city {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem; font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+
+.c-card-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.3rem; font-weight: 900; line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.c-card-lbl {
+  font-size: 0.65rem; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+.closing-quote {
+  max-width: 560px; margin: 0 auto;
+  font-size: 1.05rem; font-style: italic;
+  color: var(--dim); line-height: 1.95;
+  text-wrap: pretty;
+}
+.closing-quote::before { content: '\201C'; }
+.closing-quote::after  { content: '\201D'; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 5vw;
+  text-align: center;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+footer p { font-size: 0.77rem; color: var(--dim); }
+footer strong { color: var(--text); }
+
+/* ── FADE-IN ── */
+.fi { opacity: 0; transform: translateY(18px); transition: opacity 0.65s ease, transform 0.65s ease; }
+.fi.in { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .section { grid-template-columns: 1fr; min-height: auto; padding: 5rem 5vw; gap: 2.5rem; }
+  .s-text { position: static; }
+  .s-num { font-size: 3rem; }
+  .origins-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; }
+  .giant { font-size: 4.5rem; }
+  .c-card { min-width: 130px; }
+}
+
+
+/* ── CORRECCIÓN GENERAL: TÍTULO PRIMERO, VISUALIZACIÓN DESPUÉS ──
+   Cada bloque deja de ser texto lateral + gráfico. Primero aparece una
+   pantalla de título; al scrollear, la visualización sube desde abajo,
+   queda por encima y se lleva el título fuera de escena. */
+.section.story-block {
+  display: block;
+  position: relative;
+  min-height: 210vh;
+  padding: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  overflow: visible;
+}
+.section.story-block:nth-of-type(even) { background: var(--bg-alt); }
+
+.story-title-stage {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 7vw;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(0,209,255,0.10), transparent 32%),
+    inherit;
+  text-align: center;
+  overflow: hidden;
+}
+.story-title-stage::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 28vh;
+  background: linear-gradient(180deg, transparent, rgba(5,8,20,0.92));
+  pointer-events: none;
+}
+.section.story-block:nth-of-type(even) .story-title-stage::after {
+  background: linear-gradient(180deg, transparent, rgba(11,16,32,0.92));
+}
+
+.story-title-card {
+  position: relative;
+  z-index: 1;
+  width: min(900px, 92vw);
+  margin: 0 auto;
+  text-align: center;
+}
+.story-title-card .s-num {
+  font-size: clamp(4.4rem, 12vw, 9.5rem);
+  color: rgba(255,255,255,0.055);
+  margin-bottom: 0.9rem;
+}
+.story-title-card .s-tag {
+  color: var(--paris);
+  margin-bottom: 0.9rem;
+}
+.story-title-card h2 {
+  font-size: clamp(2.1rem, 5vw, 4.35rem);
+  max-width: 940px;
+  margin: 0 auto 1.25rem;
+  line-height: 1.04;
+}
+.story-title-card .s-body {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: clamp(0.95rem, 1.35vw, 1.08rem);
+}
+.story-title-card .callout {
+  max-width: 620px;
+  margin: 1.6rem auto 0;
+  border-left: 0;
+  border-top: 2px solid var(--paris);
+  border-radius: 10px;
+  background: rgba(0,209,255,0.075);
+}
+
+.story-viz-stage {
+  position: relative;
+  z-index: 2;
+  min-height: 108vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10vh 7vw 12vh;
+  margin-top: -4vh;
+  background:
+    linear-gradient(180deg, rgba(5,8,20,0.98) 0%, var(--bg) 14%, var(--bg) 100%);
+  box-shadow: 0 -42px 90px rgba(0,0,0,0.48);
+}
+.section.story-block:nth-of-type(even) .story-viz-stage {
+  background:
+    linear-gradient(180deg, rgba(11,16,32,0.98) 0%, var(--bg-alt) 14%, var(--bg-alt) 100%);
+}
+.story-viz {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+}
+.story-viz .chart-box {
+  width: 100%;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.38);
+}
+#origins-viz.story-viz { width: min(980px, 100%); }
+
+/* El bloque de cierre queda normal por ahora; solo se ajusta la paleta. */
+@media (max-width: 860px) {
+  .section.story-block { min-height: 200vh; }
+  .story-title-stage { padding: 6rem 5vw; }
+  .story-viz-stage { padding: 8vh 5vw 10vh; }
+  .story-title-card h2 { font-size: clamp(2rem, 10vw, 3.2rem); }
+}
+
+
+
+/* ── AJUSTE: TIPOGRAFÍAS Y BAJADAS UNIFORMES ── */
+.hero-sub,
+.s-body,
+.closing-sub,
+.giant-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--dim);
+}
+
+.hero-sub {
+  max-width: 680px;
+  font-size: clamp(1rem, 1.45vw, 1.15rem);
+  line-height: 1.75;
+  margin-bottom: 3.5rem;
+}
+
+.story-title-card .s-tag,
+.hero-tag,
+.box-label,
+.c-card-lbl {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+}
+
+.story-title-card h2,
+.closing-title,
+h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 900;
+}
+
+.story-title-card .s-body {
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  line-height: 1.72;
+}
+
+.story-title-card .callout { display: none; }
+.closing-quote::before,
+.closing-quote::after { content: none; }
+.closing-quote { font-style: normal; }
+
+/* ── PERSONA 1: TRANSICIÓN SUAVE HERO → INTRO ── */
+#hero::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 24vh;
+  background: linear-gradient(180deg, transparent, var(--bg-alt));
+  pointer-events: none;
+}
+
+/* ── PERSONA 1: VISUAL ANTES DEL MAPA — VISITANTES POR CIUDAD (PARALLAX) ── */
+#city-parallax {
+  background: var(--bg-alt);
+  border-top: 1px solid var(--border);
+  padding: 5rem 0 6rem;
+}
+.cp-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  padding: 0 2rem;
+}
+.cp-head h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+
+.cp-panels {
+  position: relative;
+  padding: 0 5vw;
+}
+/* Cada ciudad ocupa un tramo alto de scroll; adentro, la tarjeta queda
+   clavada (sticky) hasta que la siguiente ciudad sube y la tapa. */
+.cp-stack-item {
+  height: 130vh;
+  position: relative;
+}
+.cp-panel {
+  position: sticky;
+  top: 10vh;
+  height: 78vh;
+  min-height: 340px;
+  border-radius: 18px;
+  overflow: hidden;
+  isolation: isolate;
+  transform-origin: center top;
+  will-change: transform, filter;
+}
+.cp-img {
+  position: absolute;
+  top: -12%; left: 0;
+  width: 100%; height: 124%;
+  object-fit: cover;
+  will-change: transform;
+}
+.cp-panel.img-fallback { background: linear-gradient(135deg, var(--accent, var(--paris)) 0%, var(--bg) 85%); }
+.cp-panel.img-fallback .cp-img { display: none; }
+.cp-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(5,8,20,0.15) 0%, rgba(5,8,20,0.78) 100%);
+}
+.cp-content {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 1.6rem 2rem;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1rem;
+}
+.cp-country {
+  display: block;
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 0.4rem;
+}
+.cp-city {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(1.5rem, 3.2vw, 2.4rem);
+  line-height: 1;
+}
+.cp-stat {
+  text-align: right;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  line-height: 1;
+}
+.cp-stat span {
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500; font-size: 0.68rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--dim); margin-top: 0.35rem;
+}
+@media (max-width: 640px) {
+  .cp-stack-item { height: 92vh; }
+  .cp-panel { height: 60vh; min-height: 260px; top: 6vh; }
+  .cp-content { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .cp-stat { text-align: left; }
+}
+
+/* ── PERSONA 1: GALERÍA VERTICAL ANTES DEL CIERRE ── */
+#gallery {
+  --gallery-color: var(--paris);
+  --gallery-ink: #ffffff;
+  --gallery-soft: rgba(0,209,255,0.20);
+  background:
+    radial-gradient(circle at 20% 28%, color-mix(in srgb, var(--gallery-color) 70%, #ffffff 6%), transparent 34%),
+    linear-gradient(135deg,
+      var(--gallery-color) 0%,
+      color-mix(in srgb, var(--gallery-color) 72%, #050814) 48%,
+      var(--bg) 100%);
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: clip;
+  transition: background 0.55s ease;
+}
+#gallery::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5,8,20,0.16), transparent 45%, rgba(5,8,20,0.30)),
+    radial-gradient(circle at 76% 22%, rgba(255,255,255,0.16), transparent 28%);
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+.gallery-head {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 7rem 2rem 2.2rem;
+}
+.gallery-title {
+  text-align: center;
+  max-width: 640px;
+  margin: 0.6rem auto 1.6rem;
+  padding: 0;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+}
+.gallery-hint {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--gallery-ink) 72%, transparent);
+  margin: 0;
+}
+
+.city-gallery-pin {
+  position: relative;
+  z-index: 3;
+}
+.city-gallery-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(270px, 0.78fr) minmax(0, 1.22fr);
+  gap: clamp(1.6rem, 4vw, 5rem);
+  align-items: center;
+  padding: 7vh 6vw;
+  overflow: hidden;
+}
+.gallery-copy-panel {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  max-width: 470px;
+  color: var(--gallery-ink);
+  will-change: opacity, transform;
+}
+.gallery-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.82rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--gallery-ink) 34%, transparent);
+  background: color-mix(in srgb, var(--gallery-ink) 11%, transparent);
+  backdrop-filter: blur(12px);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: color-mix(in srgb, var(--gallery-ink) 82%, transparent);
+  margin-bottom: 1.35rem;
+}
+.gallery-city-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(3.6rem, 7vw, 7.3rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.07em;
+  color: var(--gallery-ink);
+  text-shadow: 0 24px 70px rgba(0,0,0,0.30);
+  margin-bottom: 1.3rem;
+}
+.gallery-photo-caption {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.35rem, 2.4vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--gallery-ink);
+  margin-bottom: 0.85rem;
+}
+.gallery-photo-sub {
+  max-width: 380px;
+  color: color-mix(in srgb, var(--gallery-ink) 76%, transparent);
+  font-size: clamp(0.92rem, 1.2vw, 1.06rem);
+  line-height: 1.65;
+}
+.gallery-mini-progress {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 1.45rem;
+}
+.gallery-mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gallery-ink) 28%, transparent);
+  transition: width 0.35s ease, background 0.35s ease, opacity 0.35s ease;
+}
+.gallery-mini-dot.active {
+  width: 28px;
+  background: var(--gallery-ink);
+}
+
+.vertical-photo-stage {
+  position: relative;
+  height: min(76vh, 720px);
+  min-height: 460px;
+  overflow: visible;
+  perspective: 1200px;
+}
+.vertical-photo-card {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: min(70vh, 650px);
+  min-height: 420px;
+  border-radius: 34px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.24);
+  background: rgba(255,255,255,0.10);
+  box-shadow: 0 42px 110px rgba(0,0,0,0.48);
+  transform: translateY(-50%);
+  will-change: transform, opacity, filter;
+}
+.vertical-photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.04);
+}
+.vertical-photo-card.img-fallback {
+  background: linear-gradient(150deg, var(--gallery-color) 0%, var(--surface) 85%);
+}
+.vertical-photo-card.img-fallback img { display: none; }
+.vertical-photo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5,8,20,0.08), transparent 46%),
+    linear-gradient(180deg, transparent 55%, rgba(5,8,20,0.24));
+}
+.gallery-photo-index {
+  position: absolute;
+  right: 1.25rem;
+  top: 1.15rem;
+  z-index: 2;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(5,8,20,0.46);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.82);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 880px) {
+  .gallery-head { padding-top: 5.5rem; }
+  .city-gallery-sticky {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-content: center;
+    gap: 1.5rem;
+    padding: 5vh 5vw 6vh;
+  }
+  .gallery-copy-panel { max-width: 100%; }
+  .gallery-city-name { font-size: clamp(3.2rem, 15vw, 5.6rem); margin-bottom: 0.85rem; }
+  .gallery-photo-caption { font-size: clamp(1.3rem, 6vw, 2rem); }
+  .vertical-photo-stage { height: 56vh; min-height: 320px; }
+  .vertical-photo-card { height: 52vh; min-height: 300px; border-radius: 24px; }
+  .gallery-photo-sub { display: none; }
+}
+
+/* Transición pulida de la galería hacia el cierre */
+#gallery::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 14vh;
+  background: linear-gradient(180deg, transparent, var(--bg-alt));
+  pointer-events: none;
+}
+
+/* ── HOSTS DE MÓDULOS CORREGIDOS ── */
+.integrated-module-host {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  background: var(--bg);
+}
+
+.city-exit { display: none !important; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="map-tip"></div>
+<section id="hero">
+<canvas id="hero-canvas"></canvas>
+<div class="hero-inner">
+<span class="hero-tag">Visualización de Datos  ·  UTDT 2025</span>
+<h1>El mundo en movimiento:<br/>los 5 destinos que todos eligen</h1>
+<p class="hero-sub">Cada año, decenas de millones de personas convergen en cinco ciudades. Exploramos cuáles son, qué las vuelve irresistibles y qué ocurrió cuando el mundo se detuvo.</p>
+<div class="scroll-hint">Scrolleá para explorar</div>
+</div>
+</section>
+<section id="intro" aria-label="Viajes internacionales registrados en 2019">
+  <div class="intro-pin">
+    <div class="intro-scene">
+      <div class="intro-earth-wrap" id="intro-earth-wrap">
+        <div class="intro-orbit"></div>
+        <div class="intro-earth intro-earth-emoji" id="intro-earth" role="img" aria-label="Planeta Tierra">🌍</div>
+      </div>
+
+      <div class="intro-count-block" id="intro-count-block">
+        <span class="intro-kicker">Viajes internacionales</span>
+        <div class="intro-count" id="intro-count">0 M</div>
+        <p class="intro-count-label">Pico máximo del turismo internacional.</p>
+      </div>
+
+      <div class="intro-shockwave" id="intro-shockwave"></div>
+      <div class="intro-sparks" aria-hidden="true"></div>
+
+      <div class="intro-final" id="intro-final">
+        <span class="intro-final-number">1.400 M</span>
+        <div class="intro-final-label">viajes internacionales registrados en 2019</div>
+        <p class="intro-final-sub">El mundo alcanza su punto máximo antes del corte: una cifra global que después se traduce en destinos concretos.</p>
+      </div>
+
+      <div class="intro-photo-gate" id="intro-photo-gate" aria-hidden="true">
+        <div class="intro-photo-strip" style="background-image:url('https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=60')"></div>
+        <div class="intro-photo-strip" style="background-image:url('https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=60')"></div>
+        <div class="intro-photo-strip" style="background-image:url('https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=60')"></div>
+        <div class="intro-photo-strip" style="background-image:url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=60')"></div>
+        <div class="intro-photo-strip" style="background-image:url('https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=60')"></div>
+      </div>
+
+      <div class="intro-handoff" id="intro-handoff">de la escala global a cinco ciudades concretas</div>
+    </div>
+  </div>
+</section>
+<div id="city-parallax">
+<div class="cp-head fi">
+<p class="s-tag">Antes de entrar al mapa</p>
+<h2>Cinco ciudades. Millones de personas moviéndose hacia ellas cada año.</h2>
+</div>
+<div class="cp-panels" id="cp-panels"></div>
+</div>
+<div id="s-map" class="integrated-module-host" data-module="mapa"></div>
+<div id="s-ranking" class="integrated-module-host" data-module="ranking"></div>
+<div id="s-timeline" class="integrated-module-host" data-module="lineas"></div>
+<div id="s-scatter" class="integrated-module-host" data-module="scatter"></div>
+<div id="gallery">
+  <div class="gallery-head">
+    <p class="s-tag" style="text-align:center;">Un último recorrido</p>
+    <h2 class="gallery-title fi">Antes de cerrar, una vuelta por las cinco ciudades.</h2>
+    <p class="gallery-hint">Scrolleá para recorrer más fotos</p>
+  </div>
+  <div class="city-gallery-pin" id="city-gallery-pin">
+    <div class="city-gallery-sticky">
+      <aside class="gallery-copy-panel">
+        <div class="gallery-step" id="gallery-step">Foto 1 de 10</div>
+        <div class="gallery-city-name" id="gallery-city-name">Bangkok</div>
+        <div class="gallery-photo-caption" id="gallery-photo-caption">Skyline nocturno</div>
+        <p class="gallery-photo-sub" id="gallery-photo-sub">Un cierre visual por las ciudades que marcaron el recorrido.</p>
+        <div class="gallery-mini-progress" id="gallery-mini-progress"></div>
+      </aside>
+      <div class="vertical-photo-stage" id="vertical-photo-stage"></div>
+    </div>
+  </div>
+</div>
+<section id="closing">
+<p class="s-tag" style="margin-bottom:0.75rem;">Vuelta al punto de partida</p>
+<h2 class="closing-title fi">¿A dónde llegamos en 2023?</h2>
+<p class="closing-sub fi">La recuperación fue notable, aunque todavía desigual entre destinos.</p>
+<div class="city-cards" id="closing-cards"></div>
+
+</section>
+<footer>
+<p><strong>Visualización de Datos</strong>  ·  Universidad Torcuato Di Tella  ·  2025</p>
+<p>Fuentes: Euromonitor International  ·  UNWTO  ·  MasterCard Global Destination Cities Index</p>
+</footer>
+<script>
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const CITIES = [
+  { name:'Bangkok',  country:'Tailandia',       v19:22.8, v23:20.0, lat:13.7,  lon:100.5, color:'#FF3B30', ldx:15, ldy:0,  la:'start' },
+  { name:'París',    country:'Francia',          v19:19.1, v23:18.0, lat:48.8,  lon:2.3,   color:'#00D1FF', ldx:-15,ldy:0,  la:'end'   },
+  { name:'Londres',  country:'Reino Unido',      v19:19.9, v23:17.5, lat:51.5,  lon:-0.1,  color:'#8B5CF6', ldx:15, ldy:-10,la:'start' },
+  { name:'Dubai',    country:'Emiratos Árabes',  v19:16.7, v23:17.2, lat:25.2,  lon:55.3,  color:'#FFD60A', ldx:13, ldy:0,  la:'start' },
+  { name:'Singapur', country:'Singapur',         v19:19.1, v23:16.0, lat:1.3,   lon:103.8, color:'#32D74B', ldx:14, ldy:6,  la:'start' },
+];
+
+const TIME_DATA = {
+  years:    [2015,2016,2017,2018,2019,2020,2021,2022,2023],
+  Bangkok:  [14.2,15.9,18.7,20.1,22.8, 2.5, 0.4,11.4,20.0],
+  París:    [15.0,13.8,15.8,17.4,19.1, 3.8, 4.5,16.0,18.0],
+  Londres:  [17.4,18.6,19.8,20.3,19.9, 2.7, 3.5,15.7,17.5],
+  Dubai:    [11.6,12.3,14.9,15.9,16.7, 5.5, 7.3,14.4,17.2],
+  Singapur: [15.1,16.4,17.4,18.5,19.1, 2.7, 1.0,13.2,16.0],
+};
+
+const SCATTER = [
+  { name:'Bangkok',  visitors:22.8, spending:917,  revenue:20.9 },
+  { name:'París',    visitors:19.1, spending:1016, revenue:19.4 },
+  { name:'Londres',  visitors:19.9, spending:1110, revenue:22.1 },
+  { name:'Dubai',    visitors:16.7, spending:1791, revenue:29.8 },
+  { name:'Singapur', visitors:19.1, spending:966,  revenue:18.5 },
+];
+
+const ORIGINS = [
+  { city:'Bangkok',  list:[['🇨🇳','China',28],['🇲🇾','Malasia',10],['🇮🇳','India',8]] },
+  { city:'París',    list:[['🇺🇸','Estados Unidos',18],['🇬🇧','Reino Unido',12],['🇩🇪','Alemania',9]] },
+  { city:'Londres',  list:[['🇺🇸','Estados Unidos',22],['🇫🇷','Francia',8],['🇦🇺','Australia',6]] },
+  { city:'Dubai',    list:[['🇮🇳','India',20],['🇸🇦','Arabia Saudita',15],['🇬🇧','Reino Unido',8]] },
+  { city:'Singapur', list:[['🇮🇩','Indonesia',18],['🇨🇳','China',15],['🇮🇳','India',11]] },
+];
+
+// ── CHART.JS DEFAULTS ─────────────────────────────────────────────────────────
+Chart.defaults.color = '#AAB4C8';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.09)';
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+
+// ── PROGRESS BAR ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.body.scrollHeight - innerHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+
+// ── INTRO UNIVERSO 1.400M · SCROLL NARRATIVO ───────────────────────────────
+(function () {
+  const intro = document.getElementById('intro');
+  if (!intro) return;
+
+  const earthWrap = document.getElementById('intro-earth-wrap');
+  const earth = document.getElementById('intro-earth');
+  const countBlock = document.getElementById('intro-count-block');
+  const countEl = document.getElementById('intro-count');
+  const shockwave = document.getElementById('intro-shockwave');
+  const finalBlock = document.getElementById('intro-final');
+  const photoGate = document.getElementById('intro-photo-gate');
+  const handoff = document.getElementById('intro-handoff');
+  const sparks = [...document.querySelectorAll('.intro-spark')];
+  const sparkAngles = sparks.map((_, i) => i * (360 / sparks.length) + (i % 2 ? 9 : -7));
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeOutBack(t) {
+    const c1 = 1.35;
+    const c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+  function formatMillions(v) { return Math.round(v).toLocaleString('es-AR') + ' M'; }
+
+  function updateIntro() {
+    const rect = intro.getBoundingClientRect();
+    const total = intro.offsetHeight - innerHeight;
+    const scrolled = Math.min(Math.max(-rect.top, 0), total);
+    const p = total > 0 ? scrolled / total : 0;
+
+    const grow = clamp01((p - 0.08) / 0.60);
+    const growEase = easeOutCubic(grow);
+    const value = growEase * 1400;
+    countEl.textContent = formatMillions(value);
+
+    // El planeta queda reconocible y prudente; el número toma escala.
+    // En la explosión no vuelan dígitos: solo sale disparado el mundo y desaparece.
+    const burst = clamp01((p - 0.70) / 0.14);
+    const explosion = clamp01((p - 0.68) / 0.16);
+    const finalIn = clamp01((p - 0.74) / 0.11);
+    const gateIn = clamp01((p - 0.92) / 0.08);
+
+    const earthBaseScale = 0.92 + growEase * 0.12;
+    const earthBurstX = burst * 34;
+    const earthBurstY = -growEase * 1.7 - burst * 30;
+    const earthRotation = growEase * 3 + burst * 48;
+    earthWrap.style.transform = `translate(-50%, -50%) translate(${earthBurstX}vw, ${earthBurstY}vh) rotate(${earthRotation}deg) scale(${earthBaseScale * (1 - burst * 0.22)})`;
+    earthWrap.style.opacity = String(clamp01(1 - burst * 1.18));
+    earthWrap.style.filter = `blur(${explosion * 2.8}px)`;
+    earth.style.transform = `scale(${1 + burst * 0.08})`;
+
+    const numberScale = 0.72 + growEase * 0.82 + burst * 0.08;
+    countBlock.style.opacity = String(clamp01(1 - finalIn * 1.32));
+    countBlock.style.transform = `translate(-50%, -50%) translateY(${-finalIn * 5}vh) scale(${numberScale})`;
+    countEl.style.filter = `drop-shadow(0 0 ${18 + growEase * 34 + burst * 18}px rgba(0,209,255,${0.12 + growEase * 0.20}))`;
+
+    shockwave.style.opacity = String(burst > 0 ? Math.max(0, 1 - burst * 0.98) : 0);
+    shockwave.style.transform = `translate(-50%, -50%) scale(${0.28 + burst * 7.0})`;
+
+    finalBlock.style.opacity = String(finalIn);
+    finalBlock.style.transform = `translate(-50%, -50%) translateY(${-gateIn * 4}vh) scale(${0.76 + easeOutBack(finalIn) * 0.24 - gateIn * 0.035})`;
+    finalBlock.style.filter = `blur(${(1 - finalIn) * 5}px)`;
+
+    photoGate.style.opacity = String(gateIn);
+    photoGate.style.transform = `translate(-50%, ${30 - easeOutCubic(gateIn) * 30}vh) scale(${0.98 + gateIn * 0.02})`;
+
+    handoff.style.opacity = String(gateIn);
+    handoff.style.transform = `translate(-50%, ${20 - easeOutCubic(gateIn) * 20}px)`;
+
+    sparks.forEach((spark) => {
+      spark.style.opacity = '0';
+    });
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => { updateIntro(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+  window.addEventListener('resize', updateIntro);
+  updateIntro();
+})();
+
+// ── HERO PARTICLES ────────────────────────────────────────────────────────────
+(function () {
+  const cvs = document.getElementById('hero-canvas');
+  const ctx = cvs.getContext('2d');
+  const pts = [];
+  function resize() { cvs.width = innerWidth; cvs.height = innerHeight; }
+  resize();
+  addEventListener('resize', resize);
+  for (let i = 0; i < 90; i++) pts.push({
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    vx: (Math.random() - 0.5) * 0.32, vy: (Math.random() - 0.5) * 0.32,
+    r: Math.random() * 1.4 + 0.3, a: Math.random() * 0.32 + 0.06,
+  });
+  function tick() {
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    pts.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > cvs.width)  p.vx *= -1;
+      if (p.y < 0 || p.y > cvs.height) p.vy *= -1;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`; ctx.fill();
+    });
+    for (let i = 0; i < pts.length; i++)
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const d = Math.hypot(dx, dy);
+        if (d < 115) {
+          ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.strokeStyle = `rgba(255,255,255,${(1 - d / 115) * 0.06})`;
+          ctx.lineWidth = 0.5; ctx.stroke();
+        }
+      }
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+// ── INTERSECTION OBSERVER UTIL ────────────────────────────────────────────────
+const _cbMap = new WeakMap();
+const _io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && _cbMap.has(e.target)) {
+      _cbMap.get(e.target)();
+      _cbMap.delete(e.target);
+      _io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+function whenVisible(el, cb) { _cbMap.set(el, cb); _io.observe(el); }
+
+// Fade-in elements
+document.querySelectorAll('.fi').forEach(el => whenVisible(el, () => el.classList.add('in')));
+
+// ── MÓDULOS CORREGIDOS INTEGRADOS ─────────────────────────────────────────
+// Los gráficos 01–04 se montan desde los HTML corregidos en Shadow DOM.
+
+
+// ── PERSONA 1: FOTOS POR CIUDAD (con fallback a gradiente si no cargan) ───────
+const CITY_PHOTOS = {
+  Bangkok:  'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1600&q=60',
+  'París':  'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=60',
+  Londres:  'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1600&q=60',
+  Dubai:    'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=60',
+  Singapur: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1600&q=60',
+};
+
+// ── PERSONA 1: STACK DE CIUDADES — VISITANTES POR CIUDAD, ANTES DEL MAPA ──────
+// Cada tarjeta queda clavada en pantalla; la siguiente la tapa achicándola y
+// oscureciéndola a medida que avanza, como un mazo de cartas.
+(function () {
+  const wrap = document.getElementById('cp-panels');
+  if (!wrap) return;
+  const panels = [];
+
+  CITIES.forEach(city => {
+    const stackItem = document.createElement('div');
+    stackItem.className = 'cp-stack-item';
+
+    const panel = document.createElement('div');
+    panel.className = 'cp-panel';
+    panel.style.setProperty('--accent', city.color);
+    panel.innerHTML = `
+      <img class="cp-img" src="${CITY_PHOTOS[city.name]}" alt="${city.name}"
+           onerror="this.parentElement.classList.add('img-fallback')">
+      <div class="cp-overlay"></div>
+      <div class="cp-content">
+        <div>
+          <span class="cp-country">${city.country}</span>
+          <div class="cp-city" style="color:${city.color}">${city.name}</div>
+        </div>
+        <div class="cp-stat">${city.v19}M<span>visitantes en 2019</span></div>
+      </div>
+    `;
+    stackItem.appendChild(panel);
+    wrap.appendChild(stackItem);
+    panels.push(panel);
+  });
+
+  function update() {
+    const stickTop = innerHeight * (innerWidth <= 640 ? 0.06 : 0.10);
+    panels.forEach((panel, i) => {
+      const img = panel.querySelector('.cp-img');
+      const r = panel.getBoundingClientRect();
+      const mid = r.top + r.height / 2 - innerHeight / 2;
+      img.style.transform = `translateY(${mid * -0.08}px)`;
+
+      const next = panels[i + 1];
+      if (!next) return;
+      const nextTop = next.getBoundingClientRect().top;
+      let progress = (innerHeight - nextTop) / (innerHeight - stickTop);
+      progress = Math.min(1, Math.max(0, progress));
+      panel.style.transform = `scale(${1 - progress * 0.07})`;
+      panel.style.filter = `brightness(${1 - progress * 0.4})`;
+    });
+  }
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
+})();
+
+// ── PERSONA 1: GALERÍA VERTICAL DE CIERRE — 2 FOTOS POR CIUDAD ─────────────
+const GALLERY_PHOTOS = [
+  { city: 'Bangkok',  caption: 'Skyline nocturno',        url: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Bangkok',  caption: 'Templos y palacios',      url: 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'París',    caption: 'La Torre Eiffel',         url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'París',    caption: 'Bulevares icónicos',      url: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Londres',  caption: 'El Big Ben y el Támesis', url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Londres',  caption: 'Tower Bridge',            url: 'https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Dubai',    caption: 'Burj Khalifa',            url: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Dubai',    caption: 'Costa y desierto',        url: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Singapur', caption: 'Marina Bay',              url: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1600&q=60' },
+  { city: 'Singapur', caption: 'Gardens by the Bay',      url: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=1600&q=60' },
+];
+
+(function () {
+  const gallery = document.getElementById('gallery');
+  const pin = document.getElementById('city-gallery-pin');
+  const stage = document.getElementById('vertical-photo-stage');
+  const cityName = document.getElementById('gallery-city-name');
+  const caption = document.getElementById('gallery-photo-caption');
+  const sub = document.getElementById('gallery-photo-sub');
+  const step = document.getElementById('gallery-step');
+  const progress = document.getElementById('gallery-mini-progress');
+  if (!gallery || !pin || !stage) return;
+
+  const cards = [];
+  GALLERY_PHOTOS.forEach((photo, i) => {
+    const city = CITIES.find(c => c.name === photo.city);
+    const card = document.createElement('article');
+    card.className = 'vertical-photo-card';
+    card.style.setProperty('--gallery-color', city ? city.color : 'var(--paris)');
+    card.innerHTML = `
+      <img src="${photo.url}" alt="${photo.city} — ${photo.caption}" onerror="this.parentElement.classList.add('img-fallback')">
+      <div class="gallery-photo-index">${String(i + 1).padStart(2, '0')} / ${String(GALLERY_PHOTOS.length).padStart(2, '0')}</div>
+    `;
+    stage.appendChild(card);
+    cards.push(card);
+
+    const dot = document.createElement('span');
+    dot.className = 'gallery-mini-dot' + (i === 0 ? ' active' : '');
+    progress.appendChild(dot);
+  });
+  const dots = [...progress.children];
+
+  function setPinHeight() {
+    const vhPerPhoto = innerWidth <= 880 ? 58 : 64;
+    pin.style.height = `calc(100vh + ${(GALLERY_PHOTOS.length - 1) * vhPerPhoto}vh)`;
+  }
+
+  function update() {
+    const rect = pin.getBoundingClientRect();
+    const scrollable = pin.offsetHeight - innerHeight;
+    const progressValue = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 0;
+    const raw = progressValue * (GALLERY_PHOTOS.length - 1);
+    const activeIndex = Math.max(0, Math.min(GALLERY_PHOTOS.length - 1, Math.round(raw)));
+    const activePhoto = GALLERY_PHOTOS[activeIndex];
+    const activeCity = CITIES.find(c => c.name === activePhoto.city) || CITIES[0];
+
+    gallery.style.setProperty('--gallery-color', activeCity.color);
+    const darkText = activePhoto.city === 'Dubai' || activePhoto.city === 'Singapur';
+    gallery.style.setProperty('--gallery-ink', darkText ? '#07101d' : '#ffffff');
+    cityName.textContent = activePhoto.city;
+    caption.textContent = activePhoto.caption;
+    step.textContent = `Foto ${activeIndex + 1} de ${GALLERY_PHOTOS.length}`;
+    sub.textContent = `Una postal de ${activePhoto.city} dentro del recorrido final por los destinos más elegidos.`;
+
+    cards.forEach((card, i) => {
+      const dist = i - raw;
+      const abs = Math.abs(dist);
+      const y = dist * 92;
+      const scale = 1 - Math.min(abs, 1.25) * 0.065;
+      const rotate = dist * -2.8;
+      const opacity = Math.max(0, 1 - Math.max(0, abs - 0.16) * 0.92);
+      const blur = Math.min(Math.max(0, abs - 0.20) * 2.2, 5.5);
+      card.style.transform = `translateY(calc(-50% + ${y}vh)) rotate(${rotate}deg) scale(${scale})`;
+      card.style.opacity = String(opacity);
+      card.style.filter = `blur(${blur}px)`;
+      card.style.zIndex = String(100 - Math.round(abs * 10));
+    });
+
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === activeIndex));
+  }
+
+  setPinHeight();
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', () => { setPinHeight(); update(); });
+  update();
+})();
+
+// ── CLOSING CARDS ─────────────────────────────────────────────────────────────
+(function () {
+  const row = document.getElementById('closing-cards');
+  CITIES.forEach(city => {
+    const el = document.createElement('div');
+    el.className = 'c-card fi';
+    el.innerHTML = `
+      <div class="c-card-city" style="color:${city.color}">${city.name}</div>
+      <div class="c-card-num"  style="color:${city.color}">${city.v23}M</div>
+      <div class="c-card-lbl">visitantes 2023</div>
+    `;
+    row.appendChild(el);
+    whenVisible(el, () => el.classList.add('in'));
+  });
+})();
+
+</script>
+
+<script>
+(function () {
+  const MODULE_HTML = {"mapa": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Mapa — recorrido por ciudades<\/title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap\" rel=\"stylesheet\">\n<script src=\"https://d3js.org/d3.v7.min.js\"><\/script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js\"><\/script>\n<style>\n*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n:root {\n  --bg:        #08111f;\n  --bg-alt:    #0d1728;\n  --surface:   #121f34;\n  --surface-2: #17263d;\n  --text:      #f4f7fb;\n  --dim:       #a8b3c7;\n  --muted:     #71809a;\n  --border:    rgba(255,255,255,0.10);\n  --completed: #8b95a7;\n\n  --bangkok:   #ff4d6d;\n  --london:    #4dabf7;\n  --paris:     #2dd4bf;\n  --singapore: #b8f35b;\n  --dubai:     #ffb000;\n  --accent:    #2dd4bf;\n}\n\nhtml { scroll-behavior: smooth; }\nbody {\n  background: var(--bg);\n  color: var(--text);\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.75;\n  overflow-x: hidden;\n}\n::-webkit-scrollbar { width: 3px; }\n::-webkit-scrollbar-track { background: var(--bg); }\n::-webkit-scrollbar-thumb { background: #243654; border-radius: 2px; }\n\n.s-tag {\n  display: block;\n  font-size: 0.67rem;\n  font-weight: 700;\n  letter-spacing: 0.16em;\n  text-transform: uppercase;\n  color: var(--accent);\n  margin-bottom: 0.75rem;\n}\n\n#map-journey {\n  position: relative;\n  height: 3900vh;\n  background: radial-gradient(circle at 50% 20%, rgba(45,212,191,0.11), transparent 34%),\n              linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);\n}\n\n/* Título inicial: mismo formato que el resto de las secciones */\n.map-title-pin {\n  position: sticky;\n  top: 0;\n  height: 100vh;\n  display: grid;\n  place-items: center;\n  z-index: 1;\n  overflow: hidden;\n  pointer-events: none;\n  background:\n    radial-gradient(circle at 50% 48%, rgba(45,212,191,0.10), transparent 32%),\n    linear-gradient(180deg, #050914 0%, var(--bg) 100%);\n}\n.map-title-card {\n  position: relative;\n  text-align: center;\n  width: min(1180px, 92vw);\n  padding: 0 5vw;\n  transform: translateY(-1.5vh);\n  transition: opacity 0.25s linear, transform 0.25s linear, filter 0.25s linear;\n}\n.map-title-number {\n  position: relative;\n  display: block;\n  z-index: 0;\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(7.5rem, 13vw, 13.2rem);\n  font-weight: 900;\n  line-height: 0.74;\n  letter-spacing: -0.08em;\n  color: rgba(244,247,251,0.045);\n  user-select: none;\n  margin: 0 auto 1.35rem;\n  transform: none;\n}\n.map-title-pill {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  padding: 0.42rem 0.82rem;\n  margin-bottom: 1.85rem;\n  border: 1px solid rgba(45,212,191,0.52);\n  border-radius: 999px;\n  background: rgba(45,212,191,0.08);\n  color: #22d3ee;\n  font-size: clamp(0.62rem, 0.82vw, 0.82rem);\n  font-weight: 800;\n  letter-spacing: 0.22em;\n  line-height: 1;\n  text-transform: uppercase;\n  box-shadow: 0 0 22px rgba(34,211,238,0.10);\n}\n.map-title-card h1 {\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(3.8rem, 6.1vw, 7.4rem);\n  font-weight: 900;\n  line-height: 0.92;\n  letter-spacing: -0.055em;\n  color: var(--text);\n  text-wrap: balance;\n  max-width: 1080px;\n  margin: 0 auto 1.65rem;\n}\n.map-title-card p {\n  color: var(--dim);\n  font-size: clamp(1.05rem, 1.35vw, 1.45rem);\n  font-weight: 500;\n  line-height: 1.75;\n  max-width: 840px;\n  margin: 0 auto;\n  text-wrap: balance;\n}\n.map-scroll-hint { display: none; }\n\n/* Escena del mapa */\n#map-pin {\n  position: sticky;\n  top: 0;\n  height: 100vh;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  overflow: hidden;\n  z-index: 3;\n  background: var(--bg-alt);\n  transform: translateY(100vh);\n  box-shadow: 0 -40px 90px rgba(0,0,0,0.48);\n}\n#map-pin::after {\n  content: '';\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  z-index: 2;\n  background:\n    radial-gradient(circle at center, transparent 42%, rgba(5,10,20,0.18) 70%, rgba(5,10,20,0.48) 100%),\n    linear-gradient(180deg, rgba(8,17,31,0.20), transparent 24%, transparent 76%, rgba(8,17,31,0.35));\n}\n#journey-svg {\n  width: 100%;\n  height: 100%;\n  display: block;\n  z-index: 1;\n}\n\n.map-status {\n  position: absolute;\n  top: 5.2vh;\n  left: 5vw;\n  z-index: 6;\n  pointer-events: none;\n  opacity: 0;\n  transform: translateY(-8px);\n  transition: opacity 0.35s ease, transform 0.35s ease;\n}\n.map-status.in { opacity: 1; transform: translateY(0); }\n.map-status .ms-kicker {\n  font-size: 0.68rem;\n  letter-spacing: 0.16em;\n  text-transform: uppercase;\n  color: var(--muted);\n  font-weight: 700;\n}\n.map-status .ms-title {\n  margin-top: 0.25rem;\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(1.35rem, 2vw, 2rem);\n  font-weight: 900;\n  line-height: 1.05;\n}\n\n/* Dots de avance */\n.journey-progress {\n  position: absolute;\n  top: 50%;\n  right: 3vw;\n  transform: translateY(-50%);\n  z-index: 7;\n  display: flex;\n  flex-direction: column;\n  gap: 0.72rem;\n}\n.jp-dot {\n  width: 9px;\n  height: 9px;\n  border-radius: 50%;\n  background: rgba(255,255,255,0.18);\n  border: 1px solid rgba(255,255,255,0.10);\n  transition: transform 0.35s ease, background 0.35s ease, opacity 0.35s ease;\n}\n.jp-dot.active { transform: scale(1.65); }\n.jp-dot.done { background: var(--completed) !important; opacity: 0.62; }\n\n/* Singapur es demasiado chico en el TopoJSON 110m:\n   este punto funciona como isla/país resaltado, no como burbuja de dato. */\n.singapore-country-highlight {\n  pointer-events: none;\n  transition: opacity 0.55s ease;\n}\n\n/* Scroll interno de cada ciudad */\n.city-story {\n  position: absolute;\n  inset: 0;\n  z-index: 8;\n  pointer-events: none;\n  opacity: 0;\n  transition: opacity 0.18s linear;\n}\n.story-card {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: min(560px, 82vw);\n  min-height: 440px;\n  border-radius: 28px;\n  overflow: hidden;\n  background: rgba(11, 20, 35, 0.82);\n  border: 1px solid rgba(255,255,255,0.16);\n  backdrop-filter: blur(18px);\n  box-shadow: 0 36px 95px rgba(0,0,0,0.58);\n  will-change: transform, opacity, filter;\n}\n.story-card::before {\n  content: '';\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  background: linear-gradient(140deg, rgba(255,255,255,0.11), transparent 28%, transparent 74%, rgba(255,255,255,0.05));\n  z-index: 1;\n}\n.story-card > * { position: relative; z-index: 2; }\n.photo-card {\n  min-height: 500px;\n  display: flex;\n  flex-direction: column;\n  justify-content: flex-end;\n  padding: 2rem;\n  background-size: cover;\n  background-position: center;\n}\n.photo-card::after {\n  content: '';\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  background: linear-gradient(180deg, rgba(8,17,31,0.05) 0%, rgba(8,17,31,0.38) 44%, rgba(8,17,31,0.92) 100%);\n}\n.photo-card > * { z-index: 2; }\n.card-kicker {\n  font-size: 0.68rem;\n  letter-spacing: 0.16em;\n  text-transform: uppercase;\n  font-weight: 800;\n  margin-bottom: 0.65rem;\n}\n.card-title {\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(2.6rem, 5.2vw, 4.8rem);\n  font-weight: 900;\n  line-height: 0.95;\n  letter-spacing: -0.05em;\n  text-wrap: balance;\n}\n.card-copy {\n  margin-top: 1rem;\n  color: var(--dim);\n  font-size: 1rem;\n  line-height: 1.7;\n  max-width: 470px;\n}\n.stat-row {\n  margin-top: 1.35rem;\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 0.75rem;\n}\n.stat-box {\n  border: 1px solid rgba(255,255,255,0.11);\n  background: rgba(255,255,255,0.055);\n  border-radius: 18px;\n  padding: 0.9rem 0.95rem;\n}\n.stat-num {\n  display: block;\n  font-family: 'Playfair Display', serif;\n  font-size: 1.75rem;\n  line-height: 1;\n  font-weight: 900;\n}\n.stat-label {\n  display: block;\n  margin-top: 0.35rem;\n  color: var(--muted);\n  font-size: 0.68rem;\n  line-height: 1.35;\n  text-transform: uppercase;\n  letter-spacing: 0.09em;\n}\n.info-card {\n  padding: 2.2rem;\n}\n.info-card .card-title { font-size: clamp(2.1rem, 3.4vw, 3.25rem); }\n.info-grid {\n  margin-top: 1.25rem;\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 0.75rem;\n}\n.info-pill {\n  border-radius: 18px;\n  padding: 1rem;\n  background: rgba(255,255,255,0.06);\n  border: 1px solid rgba(255,255,255,0.10);\n}\n.info-pill strong {\n  display: block;\n  font-family: 'Playfair Display', serif;\n  font-size: 1.55rem;\n  line-height: 1;\n  margin-bottom: 0.35rem;\n}\n.info-pill span {\n  display: block;\n  color: var(--dim);\n  font-size: 0.82rem;\n  line-height: 1.45;\n}\n.origin-chart {\n  margin-top: 1.35rem;\n  display: grid;\n  gap: 1rem;\n}\n.o-row-top {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 1rem;\n  font-size: 0.92rem;\n  color: var(--text);\n}\n.o-pct { color: var(--dim); font-variant-numeric: tabular-nums; }\n.o-track {\n  margin-top: 0.42rem;\n  height: 10px;\n  border-radius: 999px;\n  overflow: hidden;\n  background: rgba(255,255,255,0.10);\n}\n.o-fill {\n  height: 100%;\n  width: 0%;\n  border-radius: 999px;\n  transition: width 0.55s ease;\n}\n.city-exit {\n  display: none !important;\n  position: absolute;\n  bottom: 5.5vh;\n  left: 50%;\n  transform: translateX(-50%) translateY(10px);\n  z-index: 8;\n  width: min(560px, 82vw);\n  color: var(--dim);\n  text-align: center;\n  font-size: 0.78rem;\n  letter-spacing: 0.13em;\n  text-transform: uppercase;\n  opacity: 0;\n  transition: opacity 0.22s ease, transform 0.22s ease;\n  pointer-events: none;\n}\n.city-exit.in { opacity: 0.82; transform: translateX(-50%) translateY(0); }\n\n@media (max-width: 780px) {\n  #map-journey { height: 3350vh; }\n  .map-title-card { width: min(96vw, 780px); padding: 0 5vw; transform: translateY(-1vh); }\n  .map-title-number { font-size: clamp(6.3rem, 25vw, 10rem); line-height: 0.74; margin-bottom: 1.05rem; transform: none; }\n  .map-title-pill { margin-bottom: 1.35rem; }\n  .map-title-card h1 { font-size: clamp(3rem, 13vw, 4.8rem); line-height: 0.95; }\n  .map-title-card p { font-size: 0.98rem; max-width: 92vw; }\n  .journey-progress { right: 1.2vw; }\n  .map-status { left: 5vw; top: 4vh; }\n  .story-card { width: min(520px, 88vw); min-height: 390px; }\n  .photo-card { min-height: 455px; padding: 1.5rem; }\n  .info-card { padding: 1.55rem; }\n  .stat-row, .info-grid { grid-template-columns: 1fr; }\n  .card-title { font-size: clamp(2.2rem, 12vw, 3.6rem); }\n}\n<\/style>\n<\/head>\n<body>\n\n<section id=\"map-journey\">\n  <div class=\"map-title-pin\" id=\"map-title-pin\">\n    <div class=\"map-title-card\" id=\"map-title-card\">\n      <div class=\"map-title-number\">01<\/div>\n      <div class=\"map-title-pill\">Geografía global<\/div>\n      <h1>Cuatro continentes, una misma atracción.<\/h1>\n      <p>El turismo global se concentra en destinos lejanos entre sí, pero unidos por una misma fuerza de atracción.<\/p>\n    <\/div>\n    <div class=\"map-scroll-hint\" id=\"map-scroll-hint\">Scrolleá<\/div>\n  <\/div>\n\n  <div id=\"map-pin\">\n    <svg id=\"journey-svg\" viewBox=\"0 0 960 500\" preserveAspectRatio=\"xMidYMid slice\"><\/svg>\n    <div class=\"map-status\" id=\"map-status\">\n      <div class=\"ms-kicker\" id=\"ms-kicker\">Mapa global<\/div>\n      <div class=\"ms-title\" id=\"ms-title\">Recorrido por ciudades<\/div>\n    <\/div>\n    <div class=\"journey-progress\" id=\"journey-progress\"><\/div>\n    <div class=\"city-story\" id=\"city-story\"><\/div>\n    <div class=\"city-exit\" id=\"city-exit\"><\/div>\n  <\/div>\n<\/section>\n\n<script>\nfunction cssVar(name) {\n  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();\n}\nfunction clamp(v, min = 0, max = 1) { return Math.max(min, Math.min(max, v)); }\nfunction lerp(a, b, t) { return a + (b - a) * t; }\nfunction fmtM(v) { return String(v).replace('.', ',') + 'M'; }\n\nconst CITIES = [\n  {\n    name:'Bangkok', country:'Tailandia', countryId:'764', v19:22.8, v23:20.0,\n    lat:13.7, lon:100.5, color:'var(--bangkok)',\n    img:'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=1400&q=80',\n    img2:'https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=1400&q=80',\n    hook:'El mayor volumen del ranking antes de la pandemia.',\n    copy:'Bangkok aparece como el destino de mayor llegada en 2019. Su atractivo combina turismo cultural, gastronomía, compras y conexiones regionales dentro del sudeste asiático.'\n  },\n  {\n    name:'París', country:'Francia', countryId:'250', v19:19.1, v23:18.0,\n    lat:48.8, lon:2.3, color:'var(--paris)',\n    img:'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1400&q=80',\n    img2:'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=1400&q=80',\n    hook:'Una ciudad con recuperación alta y demanda constante.',\n    copy:'París sostiene una posición muy fuerte por su patrimonio cultural, su oferta urbana y el peso de Europa y Estados Unidos como mercados emisores.'\n  },\n  {\n    name:'Londres', country:'Reino Unido', countryId:'826', v19:19.9, v23:17.5,\n    lat:51.5, lon:-0.1, color:'var(--london)',\n    img:'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1400&q=80',\n    img2:'https://images.unsplash.com/photo-1505761671935-60b3a7427bad?w=1400&q=80',\n    hook:'Un nodo global donde pesa mucho el visitante de larga distancia.',\n    copy:'Londres combina turismo, negocios, cultura y conectividad aérea. Entre sus orígenes principales aparece Estados Unidos, lo que explica parte del gasto y la escala del destino.'\n  },\n  {\n    name:'Dubai', country:'Emiratos Árabes', countryId:'784', v19:16.7, v23:17.2,\n    lat:25.2, lon:55.3, color:'var(--dubai)',\n    img:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1400&q=80',\n    img2:'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1400&q=80',\n    hook:'El caso que no solo se recupera: supera su nivel pre-pandemia.',\n    copy:'Dubai funciona como hub internacional y destino de alto gasto. Su recuperación se acelera antes que otros destinos, apoyada en reaperturas, eventos y conectividad aérea.'\n  },\n  {\n    name:'Singapur', country:'Singapur', countryId:'702', v19:19.1, v23:16.0,\n    lat:1.3, lon:103.8, color:'var(--singapore)',\n    img:'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1400&q=80',\n    img2:'https://images.unsplash.com/photo-1496939376851-89342e90adcd?w=1400&q=80',\n    hook:'Un destino compacto, muy conectado y con fuerte peso regional.',\n    copy:'Singapur depende mucho del movimiento regional del sudeste asiático. Aunque en 2023 todavía no vuelve a su máximo, mantiene una red de orígenes muy concentrada en Asia.'\n  }\n].map(city => ({\n  ...city,\n  color: city.color.startsWith('var(') ? cssVar(city.color.slice(4, -1)) : city.color,\n  recovery: Math.round((city.v23 / city.v19) * 100)\n}));\n\nconst ORIGINS = [\n  { city:'Bangkok',  list:[['🇨🇳','China',28],['🇲🇾','Malasia',10],['🇮🇳','India',8]] },\n  { city:'París',    list:[['🇺🇸','Estados Unidos',18],['🇬🇧','Reino Unido',12],['🇩🇪','Alemania',9]] },\n  { city:'Londres',  list:[['🇺🇸','Estados Unidos',22],['🇫🇷','Francia',8],['🇦🇺','Australia',6]] },\n  { city:'Dubai',    list:[['🇮🇳','India',20],['🇸🇦','Arabia Saudita',15],['🇬🇧','Reino Unido',8]] },\n  { city:'Singapur', list:[['🇮🇩','Indonesia',18],['🇨🇳','China',15],['🇮🇳','India',11]] },\n];\n\n(async function () {\n  const svg = d3.select('#journey-svg');\n  const W = 960, H = 500;\n  const SCALE = 5.15;\n  const GLOBAL = { cx: W / 2, cy: H / 2, k: 1 };\n  const proj = d3.geoNaturalEarth1().scale(185).translate([W / 2, H / 2]);\n  const pathGen = d3.geoPath().projection(proj);\n  const gZoom = svg.append('g');\n  const labelLayer = svg.append('g').attr('pointer-events', 'none');\n\n  gZoom.append('rect')\n    .attr('x', -2200).attr('y', -2200).attr('width', 6400).attr('height', 6400)\n    .attr('fill', '#07101d');\n  gZoom.append('path')\n    .datum(d3.geoGraticule()())\n    .attr('fill', 'none')\n    .attr('stroke', 'rgba(255,255,255,0.035)')\n    .attr('stroke-width', 0.5)\n    .attr('d', pathGen);\n\n  const targetById = new Map(CITIES.map((city, index) => [String(city.countryId).padStart(3, '0'), { city, index }]));\n  let countryPaths = null;\n\n  try {\n    const atlasUrl = (window.__resources && window.__resources.worldAtlas) || 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';\n    const world = await fetch(atlasUrl).then(r => r.json());\n    const countries = topojson.feature(world, world.objects.countries).features;\n\n    countryPaths = gZoom.selectAll('.land')\n      .data(countries)\n      .join('path')\n      .attr('class', d => targetById.has(String(d.id).padStart(3, '0')) ? 'land target-country' : 'land')\n      .attr('d', pathGen)\n      .attr('fill', d => targetById.has(String(d.id).padStart(3, '0')) ? '#182b42' : '#14233a')\n      .attr('stroke', 'rgba(255,255,255,0.07)')\n      .attr('stroke-width', 0.4);\n\n    gZoom.append('path')\n      .datum(topojson.mesh(world, world.objects.countries, (a, b) => a !== b))\n      .attr('fill', 'none')\n      .attr('stroke', 'rgba(255,255,255,0.045)')\n      .attr('stroke-width', 0.3)\n      .attr('d', pathGen);\n  } catch (err) {\n    console.warn('No se pudo cargar el atlas mundial. El recorrido sigue funcionando con etiquetas.', err);\n  }\n\n  const markers = CITIES.map(city => {\n    const [cx, cy] = proj([city.lon, city.lat]);\n    return { city, cx, cy };\n  });\n\n  const singaporeIndex = CITIES.findIndex(c => c.name === 'Singapur');\n  const singaporeMarker = markers[singaporeIndex];\n  const singaporeHighlight = singaporeMarker\n    ? gZoom.append('circle')\n        .attr('class', 'singapore-country-highlight')\n        .attr('cx', singaporeMarker.cx)\n        .attr('cy', singaporeMarker.cy)\n        .attr('r', 4.9)\n        .attr('fill', singaporeMarker.city.color)\n        .attr('fill-opacity', 0.72)\n        .attr('stroke', singaporeMarker.city.color)\n        .attr('stroke-width', 1.15)\n        .attr('stroke-opacity', 0.9)\n        .style('filter', `drop-shadow(0 0 10px ${singaporeMarker.city.color}95)`)\n    : null;\n\n  const labels = markers.map((m) => {\n    const w = Math.max(76, m.city.name.length * 8.7 + 28);\n    const h = 27;\n    const g = labelLayer.append('g').style('opacity', 0.42);\n    const rect = g.append('rect')\n      .attr('x', -w / 2).attr('y', -h / 2)\n      .attr('width', w).attr('height', h)\n      .attr('rx', 14).attr('ry', 14)\n      .attr('fill', 'rgba(7,16,29,0.78)')\n      .attr('stroke', m.city.color)\n      .attr('stroke-width', 0.9)\n      .attr('stroke-opacity', 0.52);\n    const text = g.append('text')\n      .attr('x', 0).attr('y', 4)\n      .attr('text-anchor', 'middle')\n      .attr('fill', m.city.color)\n      .attr('font-size', '12')\n      .attr('font-weight', '800')\n      .attr('letter-spacing', '0.02em')\n      .attr('font-family', 'Inter, sans-serif')\n      .text(m.city.name);\n    return { ...m, g, rect, text };\n  });\n\n  const storyEl = document.getElementById('city-story');\n  const exitEl = document.getElementById('city-exit');\n  const statusEl = document.getElementById('map-status');\n  const statusKicker = document.getElementById('ms-kicker');\n  const statusTitle = document.getElementById('ms-title');\n  const mapPin = document.getElementById('map-pin');\n  const titleCard = document.getElementById('map-title-card');\n  const titleHint = document.getElementById('map-scroll-hint');\n  const journey = document.getElementById('map-journey');\n\n  const jp = document.getElementById('journey-progress');\n  CITIES.forEach((c) => {\n    const d = document.createElement('div');\n    d.className = 'jp-dot';\n    d.dataset.color = c.color;\n    jp.appendChild(d);\n  });\n  const jpDots = [...jp.children];\n\n  let renderedCity = -1;\n\n  function renderStory(idx) {\n    if (idx === renderedCity) return;\n    renderedCity = idx;\n    const c = CITIES[idx];\n    const origin = ORIGINS.find(o => o.city === c.name);\n    const maxPct = Math.max(...origin.list.map(o => o[2]));\n    const topOrigin = origin.list[0];\n\n    storyEl.innerHTML = `\n      <article class=\"story-card photo-card\" style=\"background-image:url('${c.img}')\">\n        <span class=\"card-kicker\" style=\"color:${c.color}\">${c.country}<\/span>\n        <h2 class=\"card-title\">${c.name}<\/h2>\n        <p class=\"card-copy\">${c.hook}<\/p>\n      <\/article>\n\n      <article class=\"story-card info-card\">\n        <span class=\"card-kicker\" style=\"color:${c.color}\">Escala del destino<\/span>\n        <h2 class=\"card-title\">Un punto del mapa, millones de viajes.<\/h2>\n        <p class=\"card-copy\">${c.copy}<\/p>\n        <div class=\"stat-row\">\n          <div class=\"stat-box\"><span class=\"stat-num\" style=\"color:${c.color}\">${fmtM(c.v19)}<\/span><span class=\"stat-label\">visitantes 2019<\/span><\/div>\n          <div class=\"stat-box\"><span class=\"stat-num\" style=\"color:${c.color}\">${fmtM(c.v23)}<\/span><span class=\"stat-label\">visitantes 2023<\/span><\/div>\n          <div class=\"stat-box\"><span class=\"stat-num\" style=\"color:${c.color}\">${c.recovery}%<\/span><span class=\"stat-label\">recuperación 2023 vs. 2019<\/span><\/div>\n        <\/div>\n      <\/article>\n\n      <article class=\"story-card photo-card\" style=\"background-image:url('${c.img2}')\">\n        <span class=\"card-kicker\" style=\"color:${c.color}\">Lectura rápida<\/span>\n        <h2 class=\"card-title\">${c.name === 'Bangkok' ? 'China marca el pulso de Bangkok.' : c.name === 'París' ? 'Estados Unidos sostiene la llegada a París.' : c.name === 'Londres' ? 'Estados Unidos pesa fuerte en Londres.' : c.name === 'Dubai' ? 'India impulsa una parte clave del flujo.' : 'La región sostiene el movimiento de Singapur.'}<\/h2>\n        <p class=\"card-copy\">El principal mercado emisor para ${c.name} es ${topOrigin[1]}, con ${topOrigin[2]}% dentro de los orígenes destacados.<\/p>\n      <\/article>\n\n      <article class=\"story-card info-card chart-card\">\n        <span class=\"card-kicker\" style=\"color:${c.color}\">Origen de visitantes<\/span>\n        <h2 class=\"card-title\">¿De dónde llegan?<\/h2>\n        <p class=\"card-copy\">Los principales orígenes se muestran por peso relativo dentro del flujo turístico de ${c.name}.<\/p>\n        <div class=\"origin-chart\">\n          ${origin.list.map(([flag, name, pct]) => `\n            <div class=\"o-row\">\n              <div class=\"o-row-top\"><span>${flag}&nbsp;${name}<\/span><span class=\"o-pct\">${pct}%<\/span><\/div>\n              <div class=\"o-track\"><div class=\"o-fill\" style=\"background:${c.color}; width:${pct / maxPct * 100}%\"><\/div><\/div>\n            <\/div>\n          `).join('')}\n        <\/div>\n      <\/article>\n    `;\n  }\n\n  function updateDots(activeIdx, completedCount) {\n    jpDots.forEach((dot, i) => {\n      dot.classList.toggle('active', i === activeIdx);\n      dot.classList.toggle('done', i < completedCount);\n      if (i === activeIdx) dot.style.background = dot.dataset.color;\n      else if (i < completedCount) dot.style.background = cssVar('--completed');\n      else dot.style.background = 'rgba(255,255,255,0.18)';\n    });\n  }\n\n  function setMap(k, cx, cy) {\n    gZoom.attr('transform', `translate(${W/2},${H/2}) scale(${k}) translate(${-cx},${-cy})`);\n    labels.forEach((label) => {\n      const x = W/2 + k * (label.cx - cx);\n      const y = H/2 + k * (label.cy - cy) - 38;\n      label.g.attr('transform', `translate(${x},${y})`);\n    });\n  }\n\n  function updateCountries(activeIdx, completedCount) {\n    if (countryPaths) {\n      countryPaths\n        .attr('fill', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return '#14233a';\n          if (target.index < completedCount) return cssVar('--completed');\n          if (target.index === activeIdx) return target.city.color;\n          return target.city.color;\n        })\n        .attr('fill-opacity', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return 1;\n          if (target.index < completedCount) return 0.54;\n          if (target.index === activeIdx) return 0.86;\n          return 0.14;\n        })\n        .attr('stroke', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return 'rgba(255,255,255,0.07)';\n          if (target.index < completedCount) return '#c3ccda';\n          return target.city.color;\n        })\n        .attr('stroke-opacity', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return 1;\n          if (target.index < completedCount) return 0.65;\n          if (target.index === activeIdx) return 1;\n          return 0.30;\n        })\n        .attr('stroke-width', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return 0.4;\n          if (target.index < completedCount) return 0.85;\n          if (target.index === activeIdx) return 1.45;\n          return 0.7;\n        })\n        .style('filter', d => {\n          const target = targetById.get(String(d.id).padStart(3, '0'));\n          if (!target) return 'none';\n          if (target.index === activeIdx) return `drop-shadow(0 0 14px ${target.city.color}90)`;\n          return 'none';\n        });\n    }\n\n    if (singaporeHighlight && singaporeIndex >= 0) {\n      const sgActive = singaporeIndex === activeIdx;\n      const sgDone = singaporeIndex < completedCount;\n      singaporeHighlight\n        .attr('fill', sgDone && !sgActive ? cssVar('--completed') : CITIES[singaporeIndex].color)\n        .attr('stroke', sgDone && !sgActive ? '#c3ccda' : CITIES[singaporeIndex].color)\n        .attr('fill-opacity', sgActive ? 0.96 : sgDone ? 0.68 : 0.34)\n        .attr('stroke-opacity', sgActive ? 1 : sgDone ? 0.72 : 0.42)\n        .attr('stroke-width', sgActive ? 1.55 : 1.05)\n        .attr('r', sgActive ? 5.8 : 4.9)\n        .style('filter', sgActive ? `drop-shadow(0 0 14px ${CITIES[singaporeIndex].color}cc)` : 'none');\n    }\n\n    labels.forEach((label, i) => {\n      const active = i === activeIdx;\n      const done = i < completedCount;\n      const color = done ? cssVar('--completed') : label.city.color;\n      label.text.attr('fill', color);\n      label.rect.attr('stroke', color);\n      label.g.style('opacity', active ? 1 : done ? 0.66 : 0.34);\n      label.rect.attr('stroke-opacity', active ? 0.88 : done ? 0.42 : 0.34);\n    });\n  }\n\n  function updateStoryCards(t, visible) {\n    storyEl.style.opacity = visible;\n    const cards = [...storyEl.querySelectorAll('.story-card')];\n    const n = Math.max(cards.length, 1);\n\n    // Cada tarjeta sigue teniendo su momento claro, pero ahora las separamos\n    // más en vertical y apagamos antes las vecinas para que no se pisen.\n    cards.forEach((card, i) => {\n      const center = (i + 0.5) / n;\n      const local = (t - center) * n;\n      const abs = Math.abs(local);\n      const y = -local * 84;\n\n      const clearZone = 0.28;       // mantiene lectura nítida sin alargar demasiado\n      const fadeStrength = 2.35;    // evita que dos tarjetas queden fuertes a la vez\n      const fade = clamp(1 - Math.max(0, abs - clearZone) * fadeStrength, 0, 1);\n      const opacity = fade * visible;\n      const blur = Math.max(0, abs - clearZone) * 3.5;\n      const scale = 1 - Math.min(Math.max(0, abs - clearZone), 1) * 0.04;\n\n      card.style.transform = `translate(-50%, calc(-50% + ${y}vh)) scale(${scale})`;\n      card.style.opacity = opacity;\n      card.style.filter = `blur(${Math.min(blur, 5)}px)`;\n      card.style.zIndex = String(100 - Math.round(abs * 10));\n    });\n  }\n\n  function updateStatus(activeIdx, completedCount, finalGlobal = false) {\n    if (finalGlobal) {\n      statusKicker.textContent = 'Mapa global completado';\n      statusTitle.textContent = 'Los cinco destinos ya fueron recorridos';\n      statusTitle.style.color = cssVar('--completed');\n      statusEl.classList.add('in');\n      return;\n    }\n    if (activeIdx >= 0) {\n      const c = CITIES[activeIdx];\n      statusKicker.textContent = `Recorrido ${activeIdx + 1} de ${CITIES.length}`;\n      statusTitle.textContent = c.name;\n      statusTitle.style.color = c.color;\n      statusEl.classList.add('in');\n    } else if (completedCount > 0) {\n      statusKicker.textContent = 'Mapa general';\n      statusTitle.textContent = `${completedCount} destino${completedCount === 1 ? '' : 's'} completado${completedCount === 1 ? '' : 's'}`;\n      statusTitle.style.color = cssVar('--completed');\n      statusEl.classList.add('in');\n    } else {\n      statusKicker.textContent = 'Mapa global';\n      statusTitle.textContent = 'Recorrido por ciudades';\n      statusTitle.style.color = cssVar('--text');\n      statusEl.classList.add('in');\n    }\n  }\n\n  function onScroll() {\n    const rect = journey.getBoundingClientRect();\n    const total = journey.offsetHeight - innerHeight;\n    const scrolled = Math.min(Math.max(-rect.top, 0), total);\n\n    const titleHold = innerHeight * 0.98;\n    const revealLen = innerHeight * 0.90;\n    const reveal = clamp((scrolled - titleHold) / revealLen);\n    const easedReveal = d3.easeCubicInOut(reveal);\n\n    mapPin.style.transform = `translateY(${(1 - easedReveal) * 100}vh)`;\n    titleCard.style.opacity = String(clamp(1 - reveal * 1.28));\n    titleCard.style.transform = `translateY(${-reveal * 38}px) scale(${1 - reveal * 0.04})`;\n    titleCard.style.filter = `blur(${reveal * 3.2}px)`;\n    titleHint.style.opacity = String(clamp(0.75 - reveal * 1.35));\n\n    if (scrolled < titleHold + revealLen) {\n      setMap(GLOBAL.k, GLOBAL.cx, GLOBAL.cy);\n      updateCountries(-1, 0);\n      updateDots(-1, 0);\n      updateStoryCards(0, 0);\n      exitEl.classList.remove('in');\n      statusEl.classList.remove('in');\n      return;\n    }\n\n    const mapTotal = total - titleHold - revealLen;\n    const p = clamp((scrolled - titleHold - revealLen) / mapTotal);\n    const raw = p * CITIES.length;\n    let idx = Math.floor(raw);\n    let phase = raw - idx;\n\n    if (idx >= CITIES.length) {\n      idx = CITIES.length - 1;\n      phase = 1;\n    }\n\n    const city = markers[idx];\n\n    // Fases más pausadas dentro de cada ciudad:\n    // 1) mapa general con lo ya completado, 2) zoom, 3) scroll interno,\n    // 4) regreso al mapa general, 5) pausa antes del próximo zoom.\n    const mapHoldEnd = 0.055;\n    const zoomInEnd = 0.215;\n    const storyEnd = 0.80;\n    const zoomOutEnd = 0.95;\n\n    let k, cx, cy;\n    let activeIdx = idx;\n    let completedCount = idx;\n    let storyVisible = 0;\n    let storyT = 0;\n    let finalGlobal = false;\n\n    if (p >= 0.995) {\n      k = GLOBAL.k; cx = GLOBAL.cx; cy = GLOBAL.cy;\n      activeIdx = -1;\n      completedCount = CITIES.length;\n      finalGlobal = true;\n    } else if (phase < mapHoldEnd) {\n      k = GLOBAL.k; cx = GLOBAL.cx; cy = GLOBAL.cy;\n      activeIdx = -1;\n      completedCount = idx;\n    } else if (phase < zoomInEnd) {\n      const e = d3.easeCubicInOut((phase - mapHoldEnd) / (zoomInEnd - mapHoldEnd));\n      k = lerp(GLOBAL.k, SCALE, e);\n      cx = lerp(GLOBAL.cx, city.cx, e);\n      cy = lerp(GLOBAL.cy, city.cy, e);\n      activeIdx = idx;\n      completedCount = idx;\n    } else if (phase < storyEnd) {\n      k = SCALE; cx = city.cx; cy = city.cy;\n      activeIdx = idx;\n      completedCount = idx;\n\n      // Dejamos margen al principio y al final para que la primera y última tarjeta\n      // también lleguen a verse completamente nítidas.\n      const rawStoryT = clamp((phase - zoomInEnd) / (storyEnd - zoomInEnd));\n      storyT = clamp(rawStoryT * 1.04 - 0.02);\n      const fadeIn = clamp((phase - zoomInEnd) / 0.055);\n      const fadeOut = clamp((storyEnd - phase) / 0.055);\n      storyVisible = Math.min(fadeIn, fadeOut);\n    } else if (phase < zoomOutEnd) {\n      const e = d3.easeCubicInOut((phase - storyEnd) / (zoomOutEnd - storyEnd));\n      k = lerp(SCALE, GLOBAL.k, e);\n      cx = lerp(city.cx, GLOBAL.cx, e);\n      cy = lerp(city.cy, GLOBAL.cy, e);\n      activeIdx = -1;\n      completedCount = idx + 1;\n    } else {\n      k = GLOBAL.k; cx = GLOBAL.cx; cy = GLOBAL.cy;\n      activeIdx = -1;\n      completedCount = idx + 1;\n    }\n\n    if (activeIdx >= 0) renderStory(activeIdx);\n    setMap(k, cx, cy);\n    updateCountries(activeIdx, completedCount);\n    updateDots(activeIdx, completedCount);\n    updateStoryCards(storyT, storyVisible);\n    updateStatus(activeIdx, completedCount, finalGlobal);\n    exitEl.classList.toggle('in', !finalGlobal && activeIdx < 0 && completedCount > 0 && phase >= storyEnd);\n  }\n\n  let ticking = false;\n  window.addEventListener('scroll', () => {\n    if (!ticking) {\n      requestAnimationFrame(() => { onScroll(); ticking = false; });\n      ticking = true;\n    }\n  }, { passive: true });\n  window.addEventListener('resize', onScroll);\n\n  renderStory(0);\n  onScroll();\n})();\n<\/script>\n<\/body>\n<\/html>\n", "ranking": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n<title>Gráfico 2 — Barras que caen<\/title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap\" rel=\"stylesheet\">\n<style>\n*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n:root {\n  --bg:        #050814;\n  --bg-alt:    #0B1020;\n  --surface:   #111827;\n  --surface-2: #162033;\n  --text:      #F4F7FB;\n  --dim:       #AAB4C8;\n  --muted:     #6F7B93;\n  --border:    rgba(255,255,255,0.10);\n  --bangkok:   #FF3B30;\n  --paris:     #00D1FF;\n  --london:    #8B5CF6;\n  --dubai:     #FFD60A;\n  --singapore: #32D74B;\n}\n\nhtml { scroll-behavior: smooth; }\nbody {\n  min-height: 100vh;\n  background: radial-gradient(circle at 18% 12%, rgba(0,209,255,0.10), transparent 33%),\n              radial-gradient(circle at 84% 82%, rgba(139,92,246,0.12), transparent 40%),\n              var(--bg);\n  color: var(--text);\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.7;\n  overflow-x: hidden;\n}\n\n::-webkit-scrollbar { width: 3px; }\n::-webkit-scrollbar-track { background: var(--bg); }\n::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 2px; }\n\n/* ══════════════ MÓDULO GRÁFICO 2 ══════════════ */\n#ranking-fall-module {\n  position: relative;\n  height: 760vh;\n  background: linear-gradient(180deg, rgba(5,8,20,0.96) 0%, rgba(11,16,32,1) 48%, rgba(5,8,20,1) 100%);\n  border-top: 1px solid var(--border);\n  border-bottom: 1px solid var(--border);\n}\n\n.ranking-pin {\n  position: sticky;\n  top: 0;\n  height: 100vh;\n  overflow: hidden;\n}\n\n.title-stage,\n.story-stage {\n  position: absolute;\n  inset: 0;\n  padding: 7vh 6.5vw;\n}\n\n.title-stage {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  z-index: 4;\n  pointer-events: none;\n}\n\n.title-card {\n  width: min(900px, 92vw);\n  text-align: center;\n  transition: opacity 0.35s ease, transform 0.35s ease;\n}\n\n.s-num {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(3.8rem, 9vw, 7.5rem);\n  font-weight: 900;\n  line-height: 0.88;\n  color: rgba(255,255,255,0.055);\n  margin-bottom: 1rem;\n  user-select: none;\n}\n\n.s-tag {\n  display: inline-block;\n  font-size: 0.68rem;\n  font-weight: 700;\n  letter-spacing: 0.18em;\n  text-transform: uppercase;\n  color: var(--paris);\n  border: 1px solid rgba(0,209,255,0.34);\n  background: rgba(0,209,255,0.055);\n  padding: 0.28em 0.9em;\n  border-radius: 999px;\n  margin-bottom: 1rem;\n}\n\nh2 {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(2.1rem, 4.2vw, 4.35rem);\n  font-weight: 900;\n  line-height: 1.04;\n  letter-spacing: -0.028em;\n  text-wrap: pretty;\n  margin-bottom: 1.05rem;\n}\n\n.s-body {\n  color: var(--dim);\n  font-size: clamp(0.98rem, 1.55vw, 1.15rem);\n  line-height: 1.8;\n  max-width: 660px;\n  margin: 0 auto;\n}\n\n.scroll-hint {\n  position: absolute;\n  left: 50%;\n  bottom: 5vh;\n  transform: translateX(-50%);\n  z-index: 5;\n  color: var(--dim);\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n  font-size: 0.7rem;\n  letter-spacing: 0.16em;\n  text-transform: uppercase;\n  opacity: 0.68;\n  transition: opacity 0.35s ease;\n}\n.scroll-hint svg { animation: bounce 1.8s ease-in-out infinite; }\n@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }\n\n.story-stage {\n  z-index: 2;\n  display: grid;\n  grid-template-columns: minmax(0, 1.14fr) minmax(320px, 0.76fr);\n  gap: clamp(2rem, 4vw, 4.2rem);\n  align-items: center;\n  opacity: 0;\n  transform: translateY(8vh);\n  transition: opacity 0.25s ease, transform 0.25s ease;\n}\n\n.story-stage.in {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n/* ══════════════ CHART IZQUIERDA ══════════════ */\n.chart-panel {\n  width: 100%;\n  max-width: 830px;\n  justify-self: center;\n  padding: clamp(1.2rem, 2.8vw, 2rem);\n  border: 1px solid var(--border);\n  border-radius: 28px;\n  background: linear-gradient(180deg, rgba(17,24,39,0.92), rgba(9,14,28,0.82));\n  box-shadow: 0 26px 86px rgba(0,0,0,0.48);\n  backdrop-filter: blur(16px);\n}\n\n.chart-kicker {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 1rem;\n  margin-bottom: 1.25rem;\n  color: var(--dim);\n  font-size: 0.68rem;\n  text-transform: uppercase;\n  letter-spacing: 0.16em;\n}\n\n.chart-kicker span:last-child {\n  color: rgba(244,247,251,0.62);\n  letter-spacing: 0.08em;\n}\n\n.bar-chart {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  gap: clamp(0.85rem, 1.7vh, 1.15rem);\n  padding: 1.1rem 0.2rem 0.6rem;\n}\n\n.bar-chart::before {\n  content: '';\n  position: absolute;\n  left: 35%;\n  top: 0;\n  bottom: 0;\n  width: 1px;\n  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent);\n}\n\n.rank-row {\n  --city-color: #fff;\n  --bar-w: 50%;\n  display: grid;\n  grid-template-columns: minmax(120px, 0.35fr) minmax(0, 0.65fr);\n  gap: clamp(0.75rem, 1.7vw, 1.2rem);\n  align-items: center;\n  min-height: clamp(58px, 9.6vh, 78px);\n  opacity: 0;\n  transform: translate3d(0, -86vh, 0) scale(0.985);\n  filter: blur(6px);\n  will-change: transform, opacity, filter;\n}\n\n.city-label {\n  text-align: right;\n  padding-right: 0.3rem;\n}\n.city-name {\n  display: block;\n  font-size: clamp(0.9rem, 1.25vw, 1.08rem);\n  font-weight: 800;\n  line-height: 1.1;\n  color: var(--text);\n}\n.city-country {\n  display: block;\n  margin-top: 0.22rem;\n  font-size: 0.7rem;\n  color: var(--dim);\n  line-height: 1.25;\n}\n\n.bar-track {\n  position: relative;\n  height: clamp(30px, 5.5vh, 44px);\n  border-radius: 999px;\n  background: rgba(255,255,255,0.055);\n  border: 1px solid rgba(255,255,255,0.08);\n  overflow: hidden;\n}\n\n.bar-fill {\n  height: 100%;\n  width: var(--bar-w);\n  border-radius: inherit;\n  background: linear-gradient(90deg, color-mix(in srgb, var(--city-color) 65%, transparent), var(--city-color));\n  box-shadow: 0 0 28px color-mix(in srgb, var(--city-color) 36%, transparent);\n  transform-origin: left center;\n  transform: scaleX(0.08);\n  will-change: transform;\n}\n\n.bar-value {\n  position: absolute;\n  right: 0.9rem;\n  top: 50%;\n  transform: translateY(-50%);\n  font-size: clamp(0.8rem, 1vw, 0.92rem);\n  font-weight: 800;\n  color: #FFFFFF;\n  text-shadow: 0 1px 3px rgba(0,0,0,0.65);\n}\n\n.rank-row.active .city-name { color: var(--city-color); }\n.rank-row.settled { filter: blur(0); }\n.rank-row.ghost .bar-track { background: rgba(255,255,255,0.025); }\n\n.chart-foot {\n  margin-top: 1.15rem;\n  color: var(--dim);\n  font-size: 0.82rem;\n  line-height: 1.55;\n}\n\n/* ══════════════ TARJETA DERECHA ══════════════ */\n.info-side {\n  position: relative;\n  min-height: 520px;\n  display: flex;\n  align-items: center;\n}\n\n.info-card {\n  width: min(430px, 100%);\n  min-height: 360px;\n  border-radius: 28px;\n  border: 1px solid var(--border);\n  background: linear-gradient(180deg, rgba(22,32,51,0.92), rgba(9,14,28,0.92));\n  box-shadow: 0 26px 86px rgba(0,0,0,0.45);\n  overflow: hidden;\n  backdrop-filter: blur(16px);\n  transform: translateY(22px);\n  opacity: 0;\n  transition: opacity 0.45s ease, transform 0.45s ease, border-color 0.45s ease;\n}\n\n.info-card.in {\n  opacity: 1;\n  transform: translateY(0);\n}\n\n.info-top {\n  min-height: 150px;\n  padding: 1.25rem 1.35rem;\n  display: flex;\n  flex-direction: column;\n  justify-content: flex-end;\n  background:\n    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--active-color) 22%, transparent), transparent 42%),\n    linear-gradient(135deg, color-mix(in srgb, var(--active-color) 20%, transparent), rgba(255,255,255,0.02));\n  border-bottom: 1px solid var(--border);\n}\n\n.info-step {\n  font-size: 0.68rem;\n  letter-spacing: 0.16em;\n  text-transform: uppercase;\n  color: var(--dim);\n  margin-bottom: 0.55rem;\n}\n\n.info-city {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(2.1rem, 4vw, 3.05rem);\n  line-height: 0.96;\n  font-weight: 900;\n  color: var(--active-color);\n  letter-spacing: -0.03em;\n}\n\n.info-country {\n  margin-top: 0.45rem;\n  color: var(--text);\n  font-size: 0.88rem;\n  font-weight: 600;\n}\n\n.info-body {\n  padding: 1.2rem 1.35rem 1.35rem;\n}\n\n.info-number {\n  display: flex;\n  align-items: baseline;\n  gap: 0.55rem;\n  margin-bottom: 0.95rem;\n}\n.info-number strong {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(2.2rem, 4vw, 3.15rem);\n  line-height: 1;\n  color: var(--text);\n}\n.info-number span {\n  color: var(--dim);\n  font-size: 0.82rem;\n}\n\n.info-text {\n  color: var(--dim);\n  font-size: 0.93rem;\n  line-height: 1.72;\n}\n\n.info-chip {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.45rem;\n  margin-top: 1.05rem;\n  padding: 0.52rem 0.72rem;\n  border-radius: 999px;\n  background: color-mix(in srgb, var(--active-color) 12%, transparent);\n  color: var(--text);\n  border: 1px solid color-mix(in srgb, var(--active-color) 32%, transparent);\n  font-size: 0.75rem;\n  font-weight: 700;\n}\n\n.progress-column {\n  position: absolute;\n  right: -1.4rem;\n  top: 50%;\n  transform: translateY(-50%);\n  display: flex;\n  flex-direction: column;\n  gap: 0.55rem;\n}\n.progress-dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: rgba(255,255,255,0.16);\n  transition: transform 0.35s ease, background 0.35s ease;\n}\n.progress-dot.on {\n  transform: scale(1.7);\n  background: var(--active-color);\n}\n\n/* Hover final: cuando el ranking ya está armado, la barra elegida conserva\n   su color y las demás pasan a blanco para focalizar la lectura. */\n.rank-row { cursor: default; }\n.rank-row.ready-hover { cursor: pointer; }\n.rank-row.hover-selected .city-name { color: var(--city-color) !important; }\n.rank-row.hover-selected .bar-fill {\n  background: linear-gradient(90deg, color-mix(in srgb, var(--city-color) 65%, transparent), var(--city-color)) !important;\n  box-shadow: 0 0 28px color-mix(in srgb, var(--city-color) 36%, transparent) !important;\n}\n.rank-row.hover-dimmed .city-name { color: rgba(255,255,255,0.82) !important; }\n.rank-row.hover-dimmed .city-country { color: rgba(244,247,251,0.48) !important; }\n.rank-row.hover-dimmed .bar-fill {\n  background: rgba(255,255,255,0.88) !important;\n  box-shadow: none !important;\n}\n.rank-row.hover-dimmed .bar-value {\n  color: #FFFFFF;\n  text-shadow: 0 1px 3px rgba(0,0,0,0.65);\n}\n\n@media (max-width: 940px) {\n  #ranking-fall-module { height: 780vh; }\n  .story-stage {\n    grid-template-columns: 1fr;\n    gap: 1.4rem;\n    padding: 5.5vh 4vw;\n    align-content: center;\n  }\n  .chart-panel { max-width: 94vw; padding: 1rem; border-radius: 22px; }\n  .bar-chart { gap: 0.62rem; }\n  .rank-row {\n    grid-template-columns: 104px 1fr;\n    min-height: 49px;\n  }\n  .city-name { font-size: 0.82rem; }\n  .city-country { font-size: 0.62rem; }\n  .info-side { min-height: auto; justify-content: center; }\n  .info-card { min-height: 265px; width: min(94vw, 560px); border-radius: 22px; }\n  .info-top { min-height: 105px; }\n  .info-body { padding: 0.9rem 1rem 1.05rem; }\n  .info-text { font-size: 0.82rem; line-height: 1.55; }\n  .progress-column { display: none; }\n  .chart-foot { display: none; }\n}\n\n@media (max-width: 560px) {\n  .title-stage { padding: 6vh 4vw; }\n  .story-stage { padding: 4vh 3vw; }\n  .rank-row { grid-template-columns: 86px 1fr; }\n  .bar-track { height: 29px; }\n  .bar-value { font-size: 0.72rem; right: 0.58rem; }\n  .chart-kicker { font-size: 0.56rem; flex-direction: column; align-items: flex-start; gap: 0.25rem; }\n}\n<\/style>\n<\/head>\n<body>\n\n<section id=\"ranking-fall-module\">\n  <div class=\"ranking-pin\">\n    <div class=\"title-stage\">\n      <div class=\"title-card\" id=\"title-card\">\n        <div class=\"s-num\">02<\/div>\n        <p class=\"s-tag\">El ranking 2019<\/p>\n        <h2>Bangkok lidera. La sorpresa que nadie esperaba.<\/h2>\n        <p class=\"s-body\">Antes de ver la evolución en el tiempo, el ranking se construye ciudad por ciudad para mostrar quiénes concentraban más visitantes internacionales.<\/p>\n      <\/div>\n    <\/div>\n\n    <div class=\"scroll-hint\" id=\"scroll-hint\">\n      <svg width=\"12\" height=\"15\" viewBox=\"0 0 12 15\" fill=\"none\" aria-hidden=\"true\">\n        <path d=\"M6 1v11M2 8.5L6 13l4-4.5\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n      <\/svg>\n      Scrolleá\n    <\/div>\n\n    <div class=\"story-stage\" id=\"story-stage\">\n      <div class=\"chart-panel\">\n        <div class=\"chart-kicker\">\n          <span>Visitantes internacionales en 2019<\/span>\n        <\/div>\n\n        <div class=\"bar-chart\" id=\"bar-chart\" aria-label=\"Ranking de visitantes por ciudad\"><\/div>\n\n        <p class=\"chart-foot\">Eje X: millones de visitantes internacionales.<\/p>\n      <\/div>\n\n      <aside class=\"info-side\">\n        <article class=\"info-card\" id=\"info-card\">\n          <div class=\"info-top\">\n            <div class=\"info-step\" id=\"info-step\">Barra 1 de 5<\/div>\n            <div class=\"info-city\" id=\"info-city\">Dubai<\/div>\n            <div class=\"info-country\" id=\"info-country\">Emiratos Árabes<\/div>\n          <\/div>\n          <div class=\"info-body\">\n            <div class=\"info-number\">\n              <strong id=\"info-number\">16,7M<\/strong>\n              <span>visitantes<\/span>\n            <\/div>\n            <p class=\"info-text\" id=\"info-text\">Dubai combina turismo de lujo, negocios y conectividad aérea. Aunque queda quinto en este grupo, ya aparece muy cerca de los destinos europeos.<\/p>\n            <div class=\"info-chip\" id=\"info-chip\">La primera barra arma la base del ranking<\/div>\n          <\/div>\n        <\/article>\n        <div class=\"progress-column\" id=\"progress-column\"><\/div>\n      <\/aside>\n    <\/div>\n  <\/div>\n<\/section>\n\n<script>\nconst COLORS = {\n  Bangkok:  '#FF3B30',\n  Londres:  '#8B5CF6',\n  París:    '#00D1FF',\n  Singapur: '#32D74B',\n  Dubai:    '#FFD60A'\n};\n\nconst RANKING_ORDER = [\n  { id:'bangkok',  name:'Bangkok',  country:'Tailandia',       visitors:22.8, color:COLORS.Bangkok,  rank:1 },\n  { id:'londres',  name:'Londres',  country:'Reino Unido',      visitors:19.9, color:COLORS.Londres,  rank:2 },\n  { id:'paris',    name:'París',    country:'Francia',          visitors:19.1, color:COLORS.París,    rank:3 },\n  { id:'singapur', name:'Singapur', country:'Singapur',         visitors:19.1, color:COLORS.Singapur, rank:4 },\n  { id:'dubai',    name:'Dubai',    country:'Emiratos Árabes',  visitors:16.7, color:COLORS.Dubai,    rank:5 }\n];\n\nconst FALL_ORDER = [\n  {\n    id:'dubai', name:'Dubai', country:'Emiratos Árabes', visitors:16.7, color:COLORS.Dubai,\n    text:'Dubai combina turismo de lujo, negocios y conectividad aérea. Aunque queda quinto en este grupo, ya aparece muy cerca de los destinos europeos.',\n    chip:'La primera barra arma la base del ranking'\n  },\n  {\n    id:'singapur', name:'Singapur', country:'Singapur', visitors:19.1, color:COLORS.Singapur,\n    text:'Singapur funciona como puerta de entrada al sudeste asiático. Su aeropuerto y su escala urbana la sostienen entre las ciudades más visitadas.',\n    chip:'Empata con París en volumen de visitantes'\n  },\n  {\n    id:'paris', name:'París', country:'Francia', visitors:19.1, color:COLORS.París,\n    text:'París confirma el peso de Europa en el turismo global: cultura, patrimonio y marca ciudad la mantienen dentro del podio compartido.',\n    chip:'Europa entra al ranking con fuerza'\n  },\n  {\n    id:'londres', name:'Londres', country:'Reino Unido', visitors:19.9, color:COLORS.Londres,\n    text:'Londres queda segunda. Su mezcla de historia, negocios, cultura y conexiones internacionales la ubica apenas por encima de París y Singapur.',\n    chip:'La segunda barra más alta del gráfico'\n  },\n  {\n    id:'bangkok', name:'Bangkok', country:'Tailandia', visitors:22.8, color:COLORS.Bangkok,\n    text:'Bangkok cierra la construcción del gráfico y revela la sorpresa: el destino líder no está en Europa, sino en Asia.',\n    chip:'Líder del ranking 2019'\n  }\n];\n\nconst maxVisitors = Math.max(...RANKING_ORDER.map(d => d.visitors));\nconst chartEl = document.getElementById('bar-chart');\nconst rowMap = new Map();\n\nfunction formatVisitors(value) {\n  return value.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'M';\n}\n\nRANKING_ORDER.forEach(city => {\n  const row = document.createElement('div');\n  row.className = 'rank-row ghost';\n  row.dataset.id = city.id;\n  row.style.setProperty('--city-color', city.color);\n  row.style.setProperty('--bar-w', (city.visitors / maxVisitors * 100).toFixed(2) + '%');\n  row.innerHTML = `\n    <div class=\"city-label\">\n      <span class=\"city-name\">${city.name}<\/span>\n      <span class=\"city-country\">${city.country}<\/span>\n    <\/div>\n    <div class=\"bar-track\">\n      <div class=\"bar-fill\"><\/div>\n      <span class=\"bar-value\">${formatVisitors(city.visitors)}<\/span>\n    <\/div>\n  `;\n  row.tabIndex = 0;\n  row.setAttribute('role', 'button');\n  row.setAttribute('aria-label', `Ver información de ${city.name}`);\n  chartEl.appendChild(row);\n  rowMap.set(city.id, row);\n\n  row.addEventListener('mouseenter', () => setBarHover(city.id));\n  row.addEventListener('focus', () => setBarHover(city.id));\n});\nchartEl.addEventListener('mouseleave', clearBarHover);\n\nconst progressEl = document.getElementById('progress-column');\nFALL_ORDER.forEach((city, i) => {\n  const dot = document.createElement('div');\n  dot.className = 'progress-dot';\n  dot.dataset.index = i;\n  progressEl.appendChild(dot);\n});\nconst progressDots = [...progressEl.children];\n\nconst moduleEl = document.getElementById('ranking-fall-module');\nconst titleCard = document.getElementById('title-card');\nconst storyStage = document.getElementById('story-stage');\nconst scrollHint = document.getElementById('scroll-hint');\nconst infoCard = document.getElementById('info-card');\nconst infoStep = document.getElementById('info-step');\nconst infoCity = document.getElementById('info-city');\nconst infoCountry = document.getElementById('info-country');\nconst infoNumber = document.getElementById('info-number');\nconst infoText = document.getElementById('info-text');\nconst infoChip = document.getElementById('info-chip');\nlet lastActiveIndex = -1;\nlet rankingComplete = false;\nlet hoveredBarId = null;\n\nfunction clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }\nfunction easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }\nfunction easeOutBack(t) {\n  const c1 = 1.70158;\n  const c3 = c1 + 1;\n  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);\n}\n\nfunction applyBarHoverState() {\n  RANKING_ORDER.forEach(city => {\n    const row = rowMap.get(city.id);\n    if (!row) return;\n    row.classList.toggle('ready-hover', rankingComplete);\n    row.classList.toggle('hover-selected', rankingComplete && hoveredBarId === city.id);\n    row.classList.toggle('hover-dimmed', rankingComplete && hoveredBarId && hoveredBarId !== city.id);\n  });\n}\n\nfunction setBarHover(id) {\n  if (!rankingComplete) return;\n  hoveredBarId = id;\n  const infoIndex = FALL_ORDER.findIndex(city => city.id === id);\n  if (infoIndex >= 0) setInfo(infoIndex, true);\n  applyBarHoverState();\n}\n\nfunction clearBarHover() {\n  if (!rankingComplete) return;\n  hoveredBarId = null;\n  setInfo(FALL_ORDER.length - 1, true);\n  applyBarHoverState();\n}\n\nfunction setInfo(index, force = false) {\n  const city = FALL_ORDER[index];\n  if (!city || (!force && index === lastActiveIndex)) return;\n  lastActiveIndex = index;\n\n  infoCard.classList.remove('in');\n  setTimeout(() => {\n    infoCard.style.setProperty('--active-color', city.color);\n    infoCard.style.borderColor = city.color + '55';\n    infoStep.textContent = `Barra ${index + 1} de ${FALL_ORDER.length}`;\n    infoCity.textContent = city.name;\n    infoCountry.textContent = city.country;\n    infoNumber.textContent = formatVisitors(city.visitors);\n    infoText.textContent = city.text;\n    infoChip.textContent = city.chip;\n    infoCard.classList.add('in');\n  }, 130);\n\n  progressDots.forEach((dot, i) => {\n    dot.classList.toggle('on', i === index);\n    if (i === index) dot.style.setProperty('--active-color', city.color);\n  });\n}\n\nfunction updateScroll() {\n  const rect = moduleEl.getBoundingClientRect();\n  const total = moduleEl.offsetHeight - innerHeight;\n  const scrolled = clamp(-rect.top, 0, total);\n  const p = total > 0 ? scrolled / total : 0;\n\n  const titleFadeStart = 0.055;\n  const titleFadeEnd = 0.165;\n  const titleRaw = clamp((p - titleFadeStart) / (titleFadeEnd - titleFadeStart), 0, 1);\n  const titleEase = easeOutCubic(titleRaw);\n  titleCard.style.opacity = String(1 - titleEase);\n  titleCard.style.transform = `translateY(${-titleEase * 18}vh) scale(${1 - titleEase * 0.035})`;\n  scrollHint.style.opacity = String(clamp(0.68 - titleRaw * 0.9, 0, 0.68));\n\n  const sceneStart = 0.13;\n  const sceneEnd = 0.93;\n  const sceneP = clamp((p - sceneStart) / (sceneEnd - sceneStart), 0, 1);\n  storyStage.classList.toggle('in', p > 0.105);\n\n  const stepSize = 1 / FALL_ORDER.length;\n  let activeIndex = clamp(Math.floor(sceneP / stepSize), 0, FALL_ORDER.length - 1);\n  if (sceneP >= 0.999) activeIndex = FALL_ORDER.length - 1;\n  rankingComplete = sceneP >= 0.95;\n  if (!rankingComplete) hoveredBarId = null;\n  if (p > 0.11 && !hoveredBarId) setInfo(activeIndex);\n\n  FALL_ORDER.forEach((city, index) => {\n    const row = rowMap.get(city.id);\n    const fill = row.querySelector('.bar-fill');\n    const local = clamp((sceneP - index * stepSize) / (stepSize * 0.78), 0, 1);\n    const fall = easeOutBack(local);\n    const scale = easeOutCubic(local);\n    const isVisible = local > 0.001;\n    const isSettled = local > 0.94;\n\n    row.style.opacity = isVisible ? String(clamp(local * 1.35, 0, 1)) : '0';\n    row.style.transform = `translate3d(0, ${(-86 * (1 - clamp(fall, 0, 1))).toFixed(2)}vh, 0) scale(${(0.985 + 0.015 * scale).toFixed(3)})`;\n    row.style.filter = `blur(${(6 * (1 - scale)).toFixed(2)}px)`;\n    fill.style.transform = `scaleX(${(0.08 + 0.92 * scale).toFixed(3)})`;\n    row.classList.toggle('settled', isSettled);\n    row.classList.toggle('ghost', !isVisible);\n    row.classList.toggle('active', index === activeIndex && isVisible);\n  });\n\n  applyBarHoverState();\n}\n\nlet ticking = false;\nwindow.addEventListener('scroll', () => {\n  if (!ticking) {\n    requestAnimationFrame(() => {\n      updateScroll();\n      ticking = false;\n    });\n    ticking = true;\n  }\n}, { passive: true });\nwindow.addEventListener('resize', updateScroll);\nupdateScroll();\n<\/script>\n<\/body>\n<\/html>\n", "lineas": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Gráfico de líneas — Turismo antes y después de 2020<\/title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap\" rel=\"stylesheet\">\n<script src=\"https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js\"><\/script>\n<style>\n*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n:root {\n  --bg:        #050814;\n  --bg-alt:    #0B1020;\n  --surface:   #111827;\n  --surface-2: #162033;\n  --text:      #F4F7FB;\n  --dim:       #AAB4C8;\n  --muted:     #6F7B93;\n  --border:    rgba(255,255,255,0.10);\n  --bangkok:   #FF3B30;\n  --paris:     #00D1FF;\n  --london:    #8B5CF6;\n  --dubai:     #FFD60A;\n  --singapore: #32D74B;\n}\n\nhtml { scroll-behavior: smooth; }\nbody {\n  background:\n    radial-gradient(circle at 18% 12%, rgba(0,209,255,0.10), transparent 33%),\n    radial-gradient(circle at 84% 82%, rgba(139,92,246,0.12), transparent 40%),\n    var(--bg);\n  color: var(--text);\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.75;\n  overflow-x: hidden;\n}\n::-webkit-scrollbar { width: 3px; }\n::-webkit-scrollbar-track { background: var(--bg); }\n::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 2px; }\n\n#progress {\n  position: fixed;\n  top: 0;\n  left: 0;\n  z-index: 10000;\n  height: 2px;\n  width: 0%;\n  background: linear-gradient(90deg, var(--paris), var(--london), var(--bangkok));\n  transform-origin: left center;\n}\n\n/* ════════════════════ SECCIÓN COMPLETA ════════════════════ */\n#line-story {\n  position: relative;\n  height: 1050vh;\n  background: var(--bg);\n}\n\n#line-pin {\n  position: sticky;\n  top: 0;\n  height: 100vh;\n  overflow: hidden;\n  background: var(--bg);\n}\n\n/* ════════════════════ PRIMERA PANTALLA: SOLO TÍTULO ════════════════════ */\n#title-layer {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n  height: 100vh;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 7rem 7vw;\n  text-align: center;\n  background:\n    radial-gradient(circle at 50% 35%, rgba(0,209,255,0.11), transparent 32%),\n    radial-gradient(circle at 80% 80%, rgba(139,92,246,0.12), transparent 38%),\n    var(--bg);\n  will-change: transform, opacity;\n}\n\n#title-layer::after {\n  content: '';\n  position: absolute;\n  inset: auto 0 0 0;\n  height: 34vh;\n  background: linear-gradient(180deg, transparent, rgba(5,8,20,0.95));\n  pointer-events: none;\n}\n\n.story-title-card {\n  position: relative;\n  z-index: 1;\n  width: min(950px, 92vw);\n}\n\n.s-num {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(4.4rem, 12vw, 9.5rem);\n  font-weight: 900;\n  color: rgba(255,255,255,0.055);\n  line-height: 1;\n  margin-bottom: 0.9rem;\n  user-select: none;\n}\n\n.s-tag {\n  display: inline-block;\n  font-size: 0.67rem;\n  font-weight: 700;\n  letter-spacing: 0.15em;\n  text-transform: uppercase;\n  color: var(--paris);\n  border: 1px solid rgba(0,209,255,0.34);\n  background: rgba(0,209,255,0.055);\n  padding: 0.28em 0.9em;\n  border-radius: 999px;\n  margin-bottom: 0.95rem;\n}\n\n.story-title-card h2 {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-weight: 900;\n  font-size: clamp(2.15rem, 5vw, 4.45rem);\n  max-width: 960px;\n  margin: 0 auto 1.15rem;\n  line-height: 1.04;\n  letter-spacing: -0.028em;\n  text-wrap: pretty;\n}\n\n.story-title-card .s-body {\n  max-width: 700px;\n  margin: 0 auto;\n  font-size: clamp(1rem, 1.3vw, 1.12rem);\n  line-height: 1.72;\n  font-weight: 400;\n  color: var(--dim);\n  text-wrap: pretty;\n}\n\n.title-hint {\n  position: absolute;\n  z-index: 2;\n  bottom: 4.2vh;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  gap: 0.5rem;\n  color: var(--dim);\n  font-size: 0.72rem;\n  letter-spacing: 0.14em;\n  text-transform: uppercase;\n  opacity: 0.65;\n}\n.title-hint svg { animation: arrowBounce 1.9s ease-in-out infinite; }\n@keyframes arrowBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }\n\n/* ════════════════════ GRÁFICO QUE SUBE Y TAPA EL TÍTULO ════════════════════ */\n#chart-layer {\n  position: absolute;\n  inset: 0;\n  z-index: 4;\n  height: 100vh;\n  transform: translateY(112vh);\n  will-change: transform;\n  background:\n    radial-gradient(circle at 20% 20%, rgba(0,209,255,0.08), transparent 34%),\n    radial-gradient(circle at 82% 76%, rgba(139,92,246,0.10), transparent 42%),\n    linear-gradient(180deg, rgba(5,8,20,0.98), var(--bg-alt));\n  box-shadow: 0 -60px 130px rgba(0,0,0,0.66);\n}\n\n#chart-layer::before {\n  content: '';\n  position: absolute;\n  inset: 0;\n  z-index: 0;\n  pointer-events: none;\n  background:\n    linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px),\n    linear-gradient(180deg, rgba(255,255,255,0.022) 1px, transparent 1px);\n  background-size: 88px 88px;\n  mask-image: linear-gradient(180deg, transparent 0%, black 16%, black 84%, transparent 100%);\n}\n\n#covid-overlay {\n  position: absolute;\n  inset: 0;\n  z-index: 1;\n  pointer-events: none;\n  background: rgba(255,45,45,0);\n}\n\n.line-layout {\n  position: relative;\n  z-index: 2;\n  width: min(1500px, 94vw);\n  height: 100vh;\n  margin: 0 auto;\n  padding: 9vh 0 7vh;\n  display: grid;\n  grid-template-columns: minmax(0, 3fr) minmax(270px, 1fr);\n  gap: clamp(1.1rem, 2vw, 2rem);\n  align-items: stretch;\n}\n\n.chart-card {\n  position: relative;\n  min-width: 0;\n  height: 100%;\n  border: 1px solid var(--border);\n  border-radius: 28px;\n  background: rgba(17,24,39,0.72);\n  box-shadow: 0 30px 95px rgba(0,0,0,0.40);\n  backdrop-filter: blur(16px);\n  overflow: hidden;\n}\n\n.chart-card::after {\n  content: '';\n  position: absolute;\n  inset: 0;\n  pointer-events: none;\n  border-radius: 28px;\n  background: linear-gradient(135deg, rgba(255,255,255,0.075), transparent 36%, rgba(255,255,255,0.025));\n}\n\n.chart-heading {\n  position: absolute;\n  top: 1.3rem;\n  left: 1.4rem;\n  right: 1.4rem;\n  z-index: 3;\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 1rem;\n  pointer-events: none;\n}\n\n.chart-kicker {\n  color: var(--dim);\n  font-size: 0.72rem;\n  letter-spacing: 0.12em;\n  text-transform: uppercase;\n  font-weight: 700;\n}\n\n.chart-axis-note {\n  color: var(--muted);\n  font-size: 0.74rem;\n  text-align: right;\n  max-width: 240px;\n}\n\n#chart-wrap {\n  position: absolute;\n  inset: 4.9rem 1.4rem 3.7rem 1.4rem;\n  z-index: 2;\n}\n#line-chart { display: block; }\n\n#year-badge {\n  position: absolute;\n  z-index: 1;\n  right: 1.5rem;\n  bottom: 1.2rem;\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: clamp(4rem, 9vw, 8rem);\n  font-weight: 900;\n  color: rgba(255,255,255,0.052);\n  line-height: 1;\n  letter-spacing: -0.03em;\n  pointer-events: none;\n  user-select: none;\n  transition: color 0.2s linear;\n}\n\n.legend-row {\n  position: absolute;\n  left: 1.35rem;\n  right: 1.35rem;\n  bottom: 1.05rem;\n  z-index: 3;\n  display: flex;\n  flex-wrap: wrap;\n  gap: 0.55rem 1rem;\n  align-items: center;\n}\n.legend-item {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.38rem;\n  color: var(--dim);\n  font-size: 0.74rem;\n  font-weight: 600;\n}\n.legend-dot {\n  width: 0.68rem;\n  height: 0.68rem;\n  border-radius: 50%;\n  border: 1px solid rgba(255,255,255,0.28);\n  box-shadow: none;\n}\n\n/* ════════════════════ COLUMNA DERECHA PARALLAX ════════════════════ */\n.year-rail {\n  position: relative;\n  min-width: 0;\n  height: 100%;\n  border: 1px solid var(--border);\n  border-radius: 28px;\n  background: rgba(12,18,32,0.78);\n  box-shadow: 0 30px 95px rgba(0,0,0,0.36);\n  backdrop-filter: blur(16px);\n  overflow: hidden;\n}\n\n.year-rail::before,\n.year-rail::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  height: 16%;\n  z-index: 5;\n  pointer-events: none;\n}\n.year-rail::before { top: 0; background: linear-gradient(180deg, rgba(12,18,32,1), transparent); }\n.year-rail::after { bottom: 0; background: linear-gradient(0deg, rgba(12,18,32,1), transparent); }\n\n.rail-top {\n  position: absolute;\n  z-index: 6;\n  top: 1rem;\n  left: 1rem;\n  right: 1rem;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 0.7rem;\n  pointer-events: none;\n}\n.rail-label {\n  color: var(--paris);\n  font-size: 0.64rem;\n  letter-spacing: 0.14em;\n  text-transform: uppercase;\n  font-weight: 800;\n}\n.rail-year-now {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: 1.25rem;\n  font-weight: 900;\n  line-height: 1;\n  color: var(--text);\n}\n\n.year-cards-window {\n  position: absolute;\n  inset: 0;\n  overflow: hidden;\n}\n#year-cards {\n  position: absolute;\n  top: 0;\n  left: 0.85rem;\n  right: 0.85rem;\n  will-change: transform;\n}\n.year-card {\n  min-height: 310px;\n  margin: 0 0 1.05rem;\n  border: 1px solid rgba(255,255,255,0.09);\n  border-radius: 22px;\n  background: rgba(255,255,255,0.055);\n  overflow: hidden;\n  opacity: 0.42;\n  transform: scale(0.94);\n  transition: opacity 0.28s ease, transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;\n}\n.year-card.active {\n  opacity: 1;\n  transform: scale(1);\n  border-color: rgba(0,209,255,0.30);\n  background: rgba(255,255,255,0.08);\n}\n.year-card.covid.active {\n  border-color: rgba(255,59,48,0.40);\n  background: rgba(255,59,48,0.085);\n}\n.yc-img {\n  height: 120px;\n  background-size: cover;\n  background-position: center;\n  position: relative;\n}\n.yc-img::after {\n  content: '';\n  position: absolute;\n  inset: 0;\n  background: linear-gradient(180deg, transparent 40%, rgba(12,18,32,0.96));\n}\n.yc-body { padding: 0.85rem 0.95rem 1rem; }\n.yc-year {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: 1.75rem;\n  line-height: 1;\n  font-weight: 900;\n  margin-bottom: 0.45rem;\n}\n.yc-title {\n  font-size: 0.82rem;\n  line-height: 1.28;\n  font-weight: 800;\n  color: var(--text);\n  margin-bottom: 0.42rem;\n}\n.yc-text {\n  color: var(--dim);\n  font-size: 0.76rem;\n  line-height: 1.55;\n}\n.yc-stat {\n  margin-top: 0.75rem;\n  display: grid;\n  grid-template-columns: 1fr auto;\n  gap: 0.4rem;\n  align-items: center;\n  color: var(--muted);\n  font-size: 0.68rem;\n  letter-spacing: 0.03em;\n  text-transform: uppercase;\n  font-weight: 700;\n}\n.yc-stat strong {\n  color: var(--text);\n  font-family: 'Playfair Display', Georgia, serif;\n  font-size: 1.05rem;\n  letter-spacing: 0;\n  text-transform: none;\n}\n\n.scroll-hint-chart {\n  position: absolute;\n  z-index: 10;\n  bottom: 2.2vh;\n  left: 50%;\n  transform: translateX(-50%);\n  color: var(--dim);\n  font-size: 0.68rem;\n  letter-spacing: 0.13em;\n  text-transform: uppercase;\n  display: flex;\n  align-items: center;\n  gap: 0.45rem;\n  opacity: 0.45;\n  pointer-events: none;\n}\n\n.fallback {\n  position: absolute;\n  inset: 0;\n  display: none;\n  align-items: center;\n  justify-content: center;\n  padding: 2rem;\n  color: var(--dim);\n  text-align: center;\n}\n\n@media (max-width: 900px) {\n  .line-layout {\n    grid-template-columns: 1fr;\n    grid-template-rows: 62vh 30vh;\n    padding: 8vh 4vw 6vh;\n  }\n  .year-rail { border-radius: 22px; }\n  .year-card { min-height: 240px; }\n  .yc-img { height: 84px; }\n  #chart-wrap { inset: 4.7rem 1rem 3.5rem; }\n  .chart-axis-note { display: none; }\n}\n\n@media (max-width: 620px) {\n  .story-title-card h2 { font-size: clamp(2rem, 12vw, 3.2rem); }\n  .line-layout { width: 96vw; padding-top: 7vh; }\n  .legend-row { gap: 0.4rem 0.65rem; }\n  .legend-item { font-size: 0.67rem; }\n}\n<\/style>\n<\/head>\n<body>\n<div id=\"progress\"><\/div>\n\n<section id=\"line-story\">\n  <div id=\"line-pin\">\n    <div id=\"title-layer\">\n      <div class=\"story-title-card\">\n        <div class=\"s-num\">03<\/div>\n        <div class=\"s-tag\">La pandemia lo cambió todo<\/div>\n        <h2>2020: el año en que el turismo global se detuvo.<\/h2>\n        <p class=\"s-body\">La curva de visitantes muestra cómo los principales destinos crecían hasta que el cierre de fronteras interrumpió el movimiento global.<\/p>\n      <\/div>\n      <div class=\"title-hint\">\n        <svg width=\"11\" height=\"14\" viewBox=\"0 0 11 14\" fill=\"none\" aria-hidden=\"true\">\n          <path d=\"M5.5 1v10M2 8l3.5 4 3.5-4\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n        <\/svg>\n        Scrolleá\n      <\/div>\n    <\/div>\n\n    <div id=\"chart-layer\">\n      <div id=\"covid-overlay\"><\/div>\n\n      <div class=\"line-layout\">\n        <div class=\"chart-card\">\n          <div class=\"chart-heading\">\n            <div>\n              <div class=\"chart-kicker\">Visitantes internacionales<\/div>\n            <\/div>\n            <div class=\"chart-axis-note\">Eje Y: millones de visitantes · Eje X: años<\/div>\n          <\/div>\n          <div id=\"chart-wrap\">\n            <canvas id=\"line-chart\"><\/canvas>\n            <div class=\"fallback\" id=\"fallback\">No se pudo cargar Chart.js. Revisá la conexión o abrí el archivo con internet.<\/div>\n          <\/div>\n          <div id=\"year-badge\">2015<\/div>\n          <div class=\"legend-row\" id=\"legend-row\"><\/div>\n        <\/div>\n\n        <aside class=\"year-rail\" aria-label=\"Información por año\">\n          <div class=\"rail-top\">\n            <div class=\"rail-label\">Año por año<\/div>\n            <div class=\"rail-year-now\" id=\"rail-year-now\">2015<\/div>\n          <\/div>\n          <div class=\"year-cards-window\">\n            <div id=\"year-cards\"><\/div>\n          <\/div>\n        <\/aside>\n      <\/div>\n\n      <div class=\"scroll-hint-chart\">\n        <svg width=\"11\" height=\"14\" viewBox=\"0 0 11 14\" fill=\"none\" aria-hidden=\"true\">\n          <path d=\"M5.5 1v10M2 8l3.5 4 3.5-4\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n        <\/svg>\n        Seguí avanzando\n      <\/div>\n    <\/div>\n  <\/div>\n<\/section>\n\n<script>\nconst rootStyles = getComputedStyle(document.documentElement);\nconst cssVar = name => rootStyles.getPropertyValue(name).trim();\n\nconst CITIES = [\n  { name:'Bangkok',  color:cssVar('--bangkok') },\n  { name:'París',    color:cssVar('--paris') },\n  { name:'Londres',  color:cssVar('--london') },\n  { name:'Dubai',    color:cssVar('--dubai') },\n  { name:'Singapur', color:cssVar('--singapore') },\n];\n\nconst TIME_DATA = {\n  years:    [2015,2016,2017,2018,2019,2020,2021,2022,2023],\n  Bangkok:  [14.2,15.9,18.7,20.1,22.8, 2.5, 0.4,11.4,20.0],\n  París:    [15.0,13.8,15.8,17.4,19.1, 3.8, 4.5,16.0,18.0],\n  Londres:  [17.4,18.6,19.8,20.3,19.9, 2.7, 3.5,15.7,17.5],\n  Dubai:    [11.6,12.3,14.9,15.9,16.7, 5.5, 7.3,14.4,17.2],\n  Singapur: [15.1,16.4,17.4,18.5,19.1, 2.7, 1.0,13.2,16.0],\n};\n\nconst YEAR_CARDS = [\n  {\n    year: 2015,\n    title: 'Los viajes ya estaban en ascenso.',\n    text: 'Los cinco destinos arrancan el período con valores altos y una base turística consolidada.',\n    img: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900&q=80',\n    stat: 'Más de 70M entre los cinco destinos'\n  },\n  {\n    year: 2016,\n    title: 'El crecimiento se sostiene.',\n    text: 'Bangkok y Londres ganan fuerza mientras Singapur mantiene un flujo alto y estable.',\n    img: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=900&q=80',\n    stat: 'Todas las curvas siguen activas'\n  },\n  {\n    year: 2017,\n    title: 'Asia empieza a destacarse.',\n    text: 'Bangkok acelera y se acerca a la cima del ranking, mientras Dubai también crece.',\n    img: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=900&q=80',\n    stat: 'Bangkok supera los 18M'\n  },\n  {\n    year: 2018,\n    title: 'El turismo global alcanza velocidad.',\n    text: 'La mayoría de las ciudades avanza en paralelo, con diferencias cada vez más pequeñas entre destinos.',\n    img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=900&q=80',\n    stat: 'Cuatro destinos arriba de 17M'\n  },\n  {\n    year: 2019,\n    title: 'El pico antes del corte.',\n    text: 'El turismo internacional llega a su máximo: Bangkok lidera y el resto de las ciudades queda muy cerca.',\n    img: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=900&q=80',\n    stat: 'Bangkok: 22,8M'\n  },\n  {\n    year: 2020,\n    title: 'El golpe del COVID-19.',\n    text: 'El cierre de fronteras interrumpe la movilidad global y las curvas caen de forma abrupta.',\n    img: 'https://images.unsplash.com/photo-1583416750470-965b2707b355?w=900&q=80',\n    stat: 'Caída generalizada',\n    covid: true\n  },\n  {\n    year: 2021,\n    title: 'Reaperturas desiguales.',\n    text: 'La recuperación no ocurre al mismo ritmo: Dubai se mueve antes que varios destinos asiáticos.',\n    img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=900&q=80',\n    stat: 'Dubai lidera la vuelta'\n  },\n  {\n    year: 2022,\n    title: 'El regreso toma forma.',\n    text: 'Europa se recupera con mayor velocidad, mientras Bangkok y Singapur todavía arrastran restricciones.',\n    img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&q=80',\n    stat: 'París vuelve a 16M'\n  },\n  {\n    year: 2023,\n    title: 'El rebote casi completo.',\n    text: 'Los principales destinos se acercan nuevamente a sus niveles previos, aunque no todos recuperan el máximo.',\n    img: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=900&q=80',\n    stat: 'Bangkok vuelve a liderar'\n  }\n];\n\nconst storyEl = document.getElementById('line-story');\nconst titleLayer = document.getElementById('title-layer');\nconst titleHint = document.querySelector('.title-hint');\nconst chartLayer = document.getElementById('chart-layer');\nconst yearBadgeEl = document.getElementById('year-badge');\nconst covidOverlay = document.getElementById('covid-overlay');\nconst progressEl = document.getElementById('progress');\nconst railYearNow = document.getElementById('rail-year-now');\nconst cardsTrack = document.getElementById('year-cards');\nconst chartWrap = document.getElementById('chart-wrap');\nconst fallback = document.getElementById('fallback');\nconst legendRow = document.getElementById('legend-row');\n\nfunction clamp(v, min = 0, max = 1) { return Math.max(min, Math.min(max, v)); }\nfunction smoothstep(t) { t = clamp(t); return t * t * (3 - 2 * t); }\nfunction formatMillion(v) { return String(v).replace('.', ',') + 'M'; }\nfunction interpolate(a, b, t) { return a + (b - a) * t; }\n\n// Render cards + legend\ncardsTrack.innerHTML = YEAR_CARDS.map(d => `\n  <article class=\"year-card${d.covid ? ' covid' : ''}\" data-year=\"${d.year}\">\n    <div class=\"yc-img\" style=\"background-image:url('${d.img}')\"><\/div>\n    <div class=\"yc-body\">\n      <div class=\"yc-year\">${d.year}<\/div>\n      <div class=\"yc-title\">${d.title}<\/div>\n      <p class=\"yc-text\">${d.text}<\/p>\n      <div class=\"yc-stat\"><span>Dato clave<\/span><strong>${d.stat}<\/strong><\/div>\n    <\/div>\n  <\/article>\n`).join('');\nconst cardEls = [...document.querySelectorAll('.year-card')];\n\nlegendRow.innerHTML = CITIES.map(c => `\n  <span class=\"legend-item\" style=\"color:${c.color}\"><span class=\"legend-dot\" style=\"background:${c.color}\"><\/span>${c.name}<\/span>\n`).join('');\n\nlet lineChart = null;\nlet displayYear = 2015;\nlet targetYear = 2015;\nlet lastActiveIndex = -1;\nlet timelineQ = 0;\nlet chartReady = false;\n\nif (!window.Chart) {\n  fallback.style.display = 'flex';\n} else {\n  Chart.defaults.color = cssVar('--dim');\n  Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';\n  Chart.defaults.font.family = \"'Inter', system-ui, sans-serif\";\n\n  const revealPlugin = {\n    id: 'reveal',\n    beforeDatasetsDraw(chart) {\n      const { ctx, chartArea, scales } = chart;\n      if (!scales.x) return;\n      const ry = chart._revealYear ?? 2015.0;\n      if (ry >= 2023.0) return;\n      const xPx = scales.x.getPixelForValue(ry);\n      ctx.save();\n      ctx.beginPath();\n      ctx.rect(chartArea.left - 4, chartArea.top - 12, Math.max(0, xPx - chartArea.left + 12), chartArea.height + 24);\n      ctx.clip();\n      chart._wasClipped = true;\n    },\n    afterDatasetsDraw(chart) {\n      if (chart._wasClipped) {\n        chart.ctx.restore();\n        chart._wasClipped = false;\n      }\n    }\n  };\n\n  const covidPlugin = {\n    id: 'covidLine',\n    afterDatasetsDraw(chart) {\n      const { ctx, chartArea, scales } = chart;\n      if (!scales.x) return;\n      const ry = chart._revealYear ?? 0;\n      if (ry < 2020.0) return;\n      const opacity = clamp((ry - 2020.0) * 8, 0, 1);\n      if (opacity <= 0) return;\n      const x = scales.x.getPixelForValue(2020);\n      ctx.save();\n      ctx.globalAlpha = opacity;\n      ctx.setLineDash([5, 4]);\n      ctx.strokeStyle = 'rgba(255,59,48,0.85)';\n      ctx.lineWidth = 1.5;\n      ctx.beginPath();\n      ctx.moveTo(x, chartArea.top);\n      ctx.lineTo(x, chartArea.bottom);\n      ctx.stroke();\n      ctx.setLineDash([]);\n      ctx.fillStyle = 'rgba(255,120,115,0.95)';\n      ctx.font = '700 10px Inter, sans-serif';\n      ctx.textAlign = 'left';\n      ctx.fillText('COVID-19', x + 7, chartArea.top + 17);\n      ctx.restore();\n    }\n  };\n\n  const lineCtx = document.getElementById('line-chart').getContext('2d');\n  lineChart = new Chart(lineCtx, {\n    type: 'line',\n    plugins: [revealPlugin, covidPlugin],\n    data: {\n      datasets: CITIES.map(c => ({\n        label: c.name,\n        data: TIME_DATA.years.map((yr, i) => ({ x: yr, y: TIME_DATA[c.name][i] })),\n        borderColor: c.color,\n        backgroundColor: 'transparent',\n        borderWidth: 2.75,\n        pointRadius: 4,\n        pointHoverRadius: 0,\n        pointBackgroundColor: c.color,\n        pointBorderColor: cssVar('--bg-alt'),\n        pointBorderWidth: 1.7,\n        tension: 0.35,\n      }))\n    },\n    options: {\n      responsive: true,\n      maintainAspectRatio: false,\n      animation: false,\n      events: [],\n      plugins: {\n        legend: { display: false },\n        tooltip: { enabled: false }\n      },\n      scales: {\n        x: {\n          type: 'linear',\n          min: 2015,\n          max: 2023,\n          grid: { color: 'rgba(255,255,255,0.045)' },\n          border: { color: 'rgba(255,255,255,0.10)' },\n          ticks: {\n            stepSize: 1,\n            callback: v => Number.isInteger(v) ? String(v) : '',\n            color: cssVar('--dim'),\n            font: { size: 12 },\n            maxRotation: 0,\n          },\n          title: { display: true, text: 'Año', color: cssVar('--muted'), font: { size: 11, weight: '600' } }\n        },\n        y: {\n          min: 0,\n          max: 25,\n          grid: { color: 'rgba(255,255,255,0.045)' },\n          border: { color: 'rgba(255,255,255,0.10)' },\n          ticks: {\n            stepSize: 5,\n            callback: v => v + 'M',\n            color: cssVar('--dim'),\n            font: { size: 11 }\n          },\n          title: { display: true, text: 'Millones de visitantes', color: cssVar('--muted'), font: { size: 11, weight: '600' } }\n        }\n      }\n    }\n  });\n\n  const ro = new ResizeObserver((entries) => {\n    for (const entry of entries) {\n      const { width, height } = entry.contentRect;\n      if (width > 0 && height > 0) {\n        chartReady = true;\n        lineChart.resize();\n        lineChart._revealYear = 2015;\n        lineChart.update('none');\n      }\n    }\n  });\n  ro.observe(chartWrap);\n}\n\nfunction interpolateSeriesAtYear(cityName, year) {\n  const years = TIME_DATA.years;\n  const values = TIME_DATA[cityName];\n  if (year <= years[0]) return values[0];\n  if (year >= years[years.length - 1]) return values[values.length - 1];\n  for (let i = 0; i < years.length - 1; i++) {\n    if (year >= years[i] && year <= years[i + 1]) {\n      const t = (year - years[i]) / (years[i + 1] - years[i]);\n      return interpolate(values[i], values[i + 1], t);\n    }\n  }\n  return values[0];\n}\n\nfunction updateNarrative(year) {\n  const exact = clamp((year - 2015) / (2023 - 2015), 0, 1) * (YEAR_CARDS.length - 1);\n  const activeIndex = Math.round(exact);\n\n  if (activeIndex !== lastActiveIndex) {\n    lastActiveIndex = activeIndex;\n    cardEls.forEach((el, i) => el.classList.toggle('active', i === activeIndex));\n  }\n\n  railYearNow.textContent = String(Math.round(year));\n\n  if (cardEls.length) {\n    const first = cardEls[0];\n    const spacing = first.offsetHeight + parseFloat(getComputedStyle(first).marginBottom || '0');\n    const rail = document.querySelector('.year-rail');\n    const railH = rail ? rail.clientHeight : 700;\n    const target = railH / 2 - (exact * spacing + first.offsetHeight / 2);\n    cardsTrack.style.transform = `translateY(${target}px)`;\n  }\n}\n\nfunction updateCovidLook(year) {\n  let cov = 0;\n  if (year >= 2019.6 && year <= 2020.4) cov = (year - 2019.6) / 0.8 * 0.095;\n  else if (year > 2020.4 && year <= 2022.1) cov = Math.max(0, 0.095 - (year - 2020.4) / 1.7 * 0.095);\n  covidOverlay.style.background = `rgba(255,45,45,${clamp(cov, 0, 0.095)})`;\n  yearBadgeEl.style.color = (year >= 2019.75 && year <= 2021.65)\n    ? 'rgba(255,90,86,0.13)'\n    : 'rgba(255,255,255,0.052)';\n}\n\nfunction onScroll() {\n  const rect = storyEl.getBoundingClientRect();\n  const total = storyEl.offsetHeight - innerHeight;\n  const p = total > 0 ? clamp(-rect.top / total, 0, 1) : 0;\n\n  progressEl.style.width = `${p * 100}%`;\n\n  // 0–11%: título completamente limpio, sin gráfico.\n  // 11–22%: el gráfico sube desde abajo y cubre el título.\n  // 22–100%: avanza la línea + columna anual.\n  const enterT = smoothstep((p - 0.11) / 0.11);\n  chartLayer.style.transform = `translateY(${(1 - enterT) * 112}vh)`;\n  titleLayer.style.transform = `translateY(${-enterT * 20}vh)`;\n  titleLayer.style.opacity = String(1 - enterT * 0.72);\n  titleHint.style.opacity = String((1 - enterT) * 0.65);\n\n  timelineQ = clamp((p - 0.22) / 0.78, 0, 1);\n  targetYear = 2015 + timelineQ * (2023 - 2015);\n}\n\nlet ticking = false;\nwindow.addEventListener('scroll', () => {\n  if (!ticking) {\n    requestAnimationFrame(() => { onScroll(); ticking = false; });\n    ticking = true;\n  }\n}, { passive: true });\nwindow.addEventListener('resize', () => requestAnimationFrame(() => updateNarrative(displayYear)));\n\nfunction animLoop() {\n  const delta = targetYear - displayYear;\n  if (Math.abs(delta) > 0.002) {\n    displayYear += delta * 0.13;\n  } else {\n    displayYear = targetYear;\n  }\n\n  if (lineChart && chartReady) {\n    lineChart._revealYear = displayYear;\n    lineChart.update('none');\n  }\n\n  yearBadgeEl.textContent = String(Math.round(displayYear));\n  updateNarrative(displayYear);\n  updateCovidLook(displayYear);\n  requestAnimationFrame(animLoop);\n}\n\nonScroll();\nupdateNarrative(2015);\nrequestAnimationFrame(animLoop);\n<\/script>\n<\/body>\n<\/html>\n", "scatter": "<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\" />\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n<title>Gráfico 4 — Más turistas no siempre significa más ingresos<\/title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">\n<style>\n*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n:root {\n  --bg:        #050814;\n  --bg-alt:    #0B1020;\n  --surface:   #111827;\n  --surface-2: #162033;\n  --text:      #F4F7FB;\n  --dim:       #AAB4C8;\n  --muted:     #6F7B93;\n  --border:    rgba(255,255,255,0.10);\n  --bangkok:   #FF3B30;\n  --paris:     #00D1FF;\n  --london:    #8B5CF6;\n  --dubai:     #FFD60A;\n  --singapore: #32D74B;\n}\n\nhtml { scroll-behavior: smooth; }\nbody {\n  background: var(--bg);\n  color: var(--text);\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.75;\n  overflow-x: hidden;\n}\n::-webkit-scrollbar { width: 3px; }\n::-webkit-scrollbar-track { background: var(--bg); }\n::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 2px; }\n\n#progress {\n  position: fixed;\n  top: 0;\n  left: 0;\n  z-index: 1000;\n  height: 2px;\n  width: 0%;\n  background: linear-gradient(90deg, var(--paris), var(--london));\n  transition: width 0.1s linear;\n}\n\n/* TÍTULO PREVIO */\n.story-title-stage {\n  position: sticky;\n  top: 0;\n  z-index: 1;\n  min-height: 100vh;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 8rem 7vw;\n  background:\n    radial-gradient(circle at 50% 35%, rgba(0,209,255,0.10), transparent 32%),\n    var(--bg);\n  text-align: center;\n  overflow: hidden;\n}\n.story-title-stage::after {\n  content: '';\n  position: absolute;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  height: 28vh;\n  background: linear-gradient(180deg, transparent, rgba(5,8,20,0.92));\n  pointer-events: none;\n}\n.story-title-card {\n  position: relative;\n  z-index: 1;\n  width: min(900px, 92vw);\n  opacity: 0;\n  transform: translateY(18px);\n  transition: opacity 0.65s ease, transform 0.65s ease;\n}\n.story-title-card.in { opacity: 1; transform: none; }\n.s-num {\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(4.4rem, 12vw, 9.5rem);\n  font-weight: 900;\n  color: rgba(255,255,255,0.055);\n  line-height: 1;\n  margin-bottom: 0.9rem;\n  user-select: none;\n}\n.s-tag {\n  font-size: 0.67rem;\n  font-weight: 700;\n  letter-spacing: 0.15em;\n  text-transform: uppercase;\n  color: var(--paris);\n  margin-bottom: 0.9rem;\n}\nh2 {\n  font-family: 'Playfair Display', Georgia, serif;\n  font-weight: 900;\n  font-size: clamp(2.1rem, 5vw, 4.35rem);\n  max-width: 940px;\n  margin: 0 auto 1.25rem;\n  line-height: 1.04;\n  text-wrap: pretty;\n}\n.s-body {\n  max-width: 680px;\n  margin: 0 auto;\n  font-size: clamp(1rem, 1.3vw, 1.12rem);\n  line-height: 1.72;\n  font-weight: 400;\n  color: var(--dim);\n  text-wrap: pretty;\n}\n\n/* SCATTER STORY */\n#scatter-story {\n  position: relative;\n  z-index: 2;\n  min-height: 650vh;\n  margin-top: -4vh;\n  background:\n    linear-gradient(180deg, rgba(5,8,20,0.98) 0%, var(--bg) 12%, var(--bg) 100%);\n  box-shadow: 0 -42px 90px rgba(0,0,0,0.48);\n}\n.scatter-pin {\n  position: sticky;\n  top: 0;\n  min-height: 100vh;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 8vh 5vw;\n  overflow: hidden;\n}\n.scatter-grid {\n  width: min(1420px, 100%);\n  display: grid;\n  grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr);\n  gap: clamp(0.9rem, 2vw, 1.4rem);\n  align-items: center;\n}\n.chart-box {\n  min-height: 650px;\n  background:\n    radial-gradient(circle at 15% 20%, rgba(0,209,255,0.075), transparent 34%),\n    var(--surface);\n  border: 1px solid var(--border);\n  border-radius: 22px;\n  padding: clamp(1.05rem, 2vw, 1.55rem);\n  box-shadow: 0 24px 70px rgba(0,0,0,0.42);\n  opacity: 0;\n  transform: translateY(22px);\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n.chart-box.in { opacity: 1; transform: none; }\n.box-label {\n  display: flex;\n  justify-content: space-between;\n  gap: 1rem;\n  align-items: baseline;\n  margin-bottom: 0.95rem;\n  color: var(--dim);\n  font-size: 0.72rem;\n  font-weight: 700;\n  letter-spacing: 0.12em;\n  text-transform: uppercase;\n}\n.box-label strong { color: var(--text); font-weight: 700; }\n.chart-area {\n  position: relative;\n  height: 565px;\n}\n#scatter-svg {\n  display: block;\n  width: 100%;\n  height: 100%;\n  overflow: visible;\n}\n.axis-label,\n.tick-label,\n.avg-label {\n  font-family: 'Inter', system-ui, sans-serif;\n  fill: var(--dim);\n}\n.axis-label { font-size: 13px; font-weight: 800; }\n.tick-label { font-size: 11px; font-weight: 650; }\n.grid-line { stroke: rgba(255,255,255,0.055); stroke-width: 1; }\n.axis-line { stroke: rgba(255,255,255,0.18); stroke-width: 1.2; }\n.avg-line { stroke: rgba(255,255,255,0.46); stroke-width: 1.35; stroke-dasharray: 7 7; }\n.avg-label { fill: rgba(255,255,255,0.72); font-size: 11px; font-weight: 800; }\n.bubble-position { pointer-events: auto; }\n.bubble-hit { fill: transparent; stroke: transparent; pointer-events: all; }\n.bubble-group {\n  opacity: 0;\n  transform: translateY(18px) scale(0.92);\n  transform-origin: center;\n  transition: opacity 0.58s ease, transform 0.58s ease;\n  cursor: pointer;\n  pointer-events: none;\n}\n.bubble-group.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }\n.bubble-ring { fill: transparent; stroke-width: 2.3; transition: stroke-width 0.25s ease, opacity 0.25s ease; }\n.bubble-fill { stroke-width: 2; transition: stroke-width 0.25s ease, opacity 0.25s ease, r 0.25s ease; }\n.bubble-label {\n  font-family: 'Inter', system-ui, sans-serif;\n  font-size: 12px;\n  font-weight: 850;\n  text-anchor: middle;\n  paint-order: stroke;\n  stroke: rgba(5,8,20,0.88);\n  stroke-width: 4px;\n  stroke-linejoin: round;\n  transition: font-size 0.25s ease;\n}\n.bubble-group.active .bubble-ring { stroke-width: 3.2; opacity: 0.95; }\n.bubble-group.active .bubble-fill { stroke-width: 3.4; opacity: 0.82; }\n.bubble-group.active .bubble-label { font-size: 13.5px; }\n.reveal-counter {\n  position: absolute;\n  left: 1.2rem;\n  bottom: 1rem;\n  display: flex;\n  gap: 0.5rem;\n  align-items: center;\n  color: var(--dim);\n  font-size: 0.78rem;\n  pointer-events: none;\n}\n.reveal-dots { display: flex; gap: 0.35rem; }\n.reveal-dot {\n  width: 7px;\n  height: 7px;\n  border-radius: 999px;\n  background: rgba(255,255,255,0.16);\n  transition: transform 0.35s ease, background 0.35s ease;\n}\n.reveal-dot.on { transform: scale(1.35); background: var(--dot-color, var(--paris)); }\n\n/* PANEL LATERAL / POP-UP */\n.side-zone {\n  min-height: 650px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.side-panel {\n  --active-color: var(--paris);\n  width: 100%;\n  min-height: 390px;\n  background:\n    radial-gradient(circle at 18% 10%, rgba(255,255,255,0.06), transparent 38%),\n    rgba(17,24,39,0.95);\n  border: 1px solid var(--border);\n  border-radius: 22px;\n  padding: clamp(1rem, 1.45vw, 1.25rem);\n  box-shadow: 0 22px 60px rgba(0,0,0,0.48);\n  opacity: 0;\n  transform: translateX(22px);\n  transition: opacity 0.45s ease, transform 0.45s ease, border-color 0.45s ease;\n}\n.side-panel.in { opacity: 1; transform: none; }\n.panel-kicker {\n  color: var(--dim);\n  font-size: 0.7rem;\n  font-weight: 700;\n  letter-spacing: 0.14em;\n  text-transform: uppercase;\n  margin-bottom: 0.6rem;\n}\n.panel-title {\n  display: flex;\n  align-items: center;\n  gap: 0.75rem;\n  font-family: 'Playfair Display', serif;\n  font-size: clamp(1.55rem, 2.35vw, 2.15rem);\n  font-weight: 900;\n  line-height: 1;\n  color: var(--active-color);\n  margin-bottom: 0.45rem;\n}\n.panel-title::before {\n  content: '';\n  width: 0.8rem;\n  height: 0.8rem;\n  border-radius: 999px;\n  background: var(--active-color);\n  box-shadow: 0 0 22px rgba(255,255,255,0.18);\n  flex: 0 0 auto;\n}\n.panel-country {\n  color: var(--dim);\n  font-weight: 600;\n  margin-bottom: 0.9rem;\n}\n.panel-metrics {\n  display: grid;\n  gap: 0.48rem;\n  margin-bottom: 0.95rem;\n}\n.metric-row {\n  display: grid;\n  grid-template-columns: 1fr auto;\n  gap: 1rem;\n  align-items: baseline;\n  font-size: clamp(0.82rem, 1vw, 0.98rem);\n}\n.metric-label { color: var(--dim); font-weight: 700; }\n.metric-value {\n  color: var(--text);\n  font-weight: 850;\n  letter-spacing: 0.01em;\n}\n.panel-sep {\n  height: 1px;\n  background: var(--border);\n  margin: 0.9rem 0 0.95rem;\n}\n.avg-title {\n  color: var(--dim);\n  font-weight: 850;\n  font-size: 0.82rem;\n  margin-bottom: 0.6rem;\n}\n.avg-bar-wrap {\n  position: relative;\n  height: 10px;\n  border-radius: 999px;\n  background: rgba(255,255,255,0.10);\n  overflow: hidden;\n  margin-bottom: 0.85rem;\n}\n.avg-fill {\n  position: absolute;\n  left: 0;\n  top: 0;\n  bottom: 0;\n  width: var(--fill-w, 50%);\n  background: var(--active-color);\n  border-radius: inherit;\n  transition: width 0.55s ease;\n}\n.avg-marker {\n  position: absolute;\n  top: -3px;\n  left: var(--avg-x, 50%);\n  width: 4px;\n  height: 16px;\n  border-radius: 999px;\n  background: #FFFFFF;\n  box-shadow: 0 0 14px rgba(255,255,255,0.55);\n  transform: translateX(-50%);\n}\n.avg-scale {\n  display: grid;\n  grid-template-columns: auto 1fr auto;\n  color: var(--muted);\n  font-size: 0.72rem;\n  margin-bottom: 0.65rem;\n}\n.avg-scale span:nth-child(2) { text-align: center; color: rgba(255,255,255,0.66); }\n.avg-text {\n  color: var(--dim);\n  font-size: clamp(0.78rem, 0.96vw, 0.9rem);\n  line-height: 1.65;\n  font-weight: 650;\n}\n.panel-note {\n  margin-top: 1rem;\n  color: var(--muted);\n  font-size: 0.76rem;\n  line-height: 1.6;\n}\n.scroll-hint {\n  position: absolute;\n  left: 50%;\n  bottom: 3.1vh;\n  transform: translateX(-50%);\n  z-index: 6;\n  display: flex;\n  align-items: center;\n  gap: 0.45rem;\n  color: rgba(170,180,200,0.72);\n  font-size: 0.68rem;\n  font-weight: 700;\n  letter-spacing: 0.13em;\n  text-transform: uppercase;\n  pointer-events: none;\n  transition: opacity 0.35s ease;\n}\n.scroll-hint .arr { animation: arrowBounce 1.9s ease-in-out infinite; }\n@keyframes arrowBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }\n\n@media (max-width: 980px) {\n  #scatter-story { min-height: 720vh; }\n  .scatter-pin { padding: 5vh 4vw 8vh; align-items: flex-start; overflow: visible; }\n  .scatter-grid { grid-template-columns: 1fr; gap: 1rem; }\n  .chart-box, .side-zone { min-height: auto; }\n  .chart-area { height: 430px; }\n  .side-panel { min-height: auto; }\n  .scroll-hint { display: none; }\n}\n\n@media (max-width: 620px) {\n  .story-title-stage { padding: 6rem 5vw; }\n  h2 { font-size: clamp(2rem, 10vw, 3.2rem); }\n  .box-label { flex-direction: column; gap: 0.2rem; }\n  .chart-area { height: 380px; }\n  .panel-title { font-size: 2rem; }\n  .metric-row { grid-template-columns: 1fr; gap: 0.15rem; }\n}\n<\/style>\n<\/head>\n<body>\n<div id=\"progress\"><\/div>\n\n<section id=\"s-scatter\">\n  <div class=\"story-title-stage\">\n    <div class=\"story-title-card\" id=\"title-card\">\n      <div class=\"s-num\">04<\/div>\n      <p class=\"s-tag\">El dinero no es proporcional<\/p>\n      <h2>Más turistas no siempre significa más ingresos.<\/h2>\n      <p class=\"s-body\">La cantidad de visitantes no explica todo: el gasto promedio cambia el peso económico de cada ciudad.<\/p>\n    <\/div>\n  <\/div>\n\n  <div id=\"scatter-story\">\n    <div class=\"scatter-pin\">\n      <div class=\"scatter-grid\">\n        <div class=\"chart-box\" id=\"scatter-box\">\n          <div class=\"box-label\">\n            <span>Visitantes 2019 vs. gasto por turista<\/span>\n            <strong>Burbuja = ingresos totales<\/strong>\n          <\/div>\n          <div class=\"chart-area\">\n            <svg id=\"scatter-svg\" viewBox=\"0 0 760 560\" role=\"img\" aria-label=\"Gráfico de burbujas sobre visitantes, gasto por turista e ingresos totales\"><\/svg>\n            <div class=\"reveal-counter\">\n              <div class=\"reveal-dots\" id=\"reveal-dots\"><\/div>\n              <span id=\"reveal-text\">0 de 5 destinos visibles<\/span>\n            <\/div>\n          <\/div>\n        <\/div>\n\n        <aside class=\"side-zone\">\n          <div class=\"side-panel\" id=\"side-panel\">\n            <div class=\"panel-kicker\" id=\"panel-kicker\">Destino destacado<\/div>\n            <div class=\"panel-title\" id=\"panel-title\">Dubai<\/div>\n            <div class=\"panel-country\" id=\"panel-country\">Emiratos Árabes<\/div>\n\n            <div class=\"panel-metrics\">\n              <div class=\"metric-row\">\n                <span class=\"metric-label\">Visitantes 2019<\/span>\n                <span class=\"metric-value\" id=\"panel-visitors\">16.7M<\/span>\n              <\/div>\n              <div class=\"metric-row\">\n                <span class=\"metric-label\">Gasto / turista<\/span>\n                <span class=\"metric-value\" id=\"panel-spending\">USD 1791<\/span>\n              <\/div>\n              <div class=\"metric-row\">\n                <span class=\"metric-label\">Ingresos totales<\/span>\n                <span class=\"metric-value\" id=\"panel-revenue\">USD 29.8B<\/span>\n              <\/div>\n            <\/div>\n\n            <div class=\"panel-sep\"><\/div>\n\n            <div class=\"avg-title\">Gasto por turista vs. promedio<\/div>\n            <div class=\"avg-bar-wrap\">\n              <div class=\"avg-fill\" id=\"avg-fill\"><\/div>\n              <div class=\"avg-marker\" id=\"avg-marker\"><\/div>\n            <\/div>\n            <div class=\"avg-scale\">\n              <span>USD 800<\/span>\n              <span>Promedio: USD <span id=\"avg-value\">1160<\/span><\/span>\n              <span>USD 1900<\/span>\n            <\/div>\n            <div class=\"avg-text\" id=\"avg-text\">+54% sobre el promedio.<\/div>\n            <p class=\"panel-note\" id=\"panel-note\">Aunque recibe menos visitantes que otros destinos, su gasto promedio eleva el ingreso total.<\/p>\n          <\/div>\n        <\/aside>\n      <\/div>\n\n      <div class=\"scroll-hint\" id=\"scroll-hint\">\n        <svg class=\"arr\" width=\"11\" height=\"14\" viewBox=\"0 0 11 14\" fill=\"none\">\n          <path d=\"M5.5 1v10M2 8l3.5 4 3.5-4\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n        <\/svg>\n        Scrolleá para sumar destinos\n      <\/div>\n    <\/div>\n  <\/div>\n<\/section>\n\n<script>\nconst COLORS = {\n  Bangkok:  '#FF3B30',\n  París:    '#00D1FF',\n  Londres:  '#8B5CF6',\n  Dubai:    '#FFD60A',\n  Singapur: '#32D74B'\n};\n\nconst SCATTER = [\n  {\n    name:'Dubai', country:'Emiratos Árabes', visitors:16.7, spending:1791, revenue:29.8,\n    color:COLORS.Dubai,\n    note:'Aunque recibe menos visitantes que otros destinos, su gasto promedio eleva el ingreso total.'\n  },\n  {\n    name:'Singapur', country:'Singapur', visitors:19.1, spending:966, revenue:18.5,\n    color:COLORS.Singapur,\n    note:'Conecta negocios, escala regional y turismo urbano, pero su gasto promedio queda por debajo del promedio del grupo.'\n  },\n  {\n    name:'París', country:'Francia', visitors:19.1, spending:1016, revenue:19.4,\n    color:COLORS.París,\n    note:'Sostiene un volumen muy alto de visitantes, aunque el gasto por turista no es el más elevado.'\n  },\n  {\n    name:'Londres', country:'Reino Unido', visitors:19.9, spending:1110, revenue:22.1,\n    color:COLORS.Londres,\n    note:'Combina muchos visitantes con un gasto medio cercano al promedio, por eso supera a París en ingresos.'\n  },\n  {\n    name:'Bangkok', country:'Tailandia', visitors:22.8, spending:917, revenue:20.9,\n    color:COLORS.Bangkok,\n    note:'Lidera en cantidad de visitantes, pero su gasto promedio menor limita el ingreso total frente a Dubai.'\n  }\n];\n\nconst AVG_SPENDING = Math.round(SCATTER.reduce((acc, d) => acc + d.spending, 0) / SCATTER.length);\nconst SPEND_MIN = 800;\nconst SPEND_MAX = 2050;\nconst BAR_MIN = 800;\nconst BAR_MAX = 1900;\nconst VIS_MIN = 14;\nconst VIS_MAX = 25;\nconst maxRev = Math.max(...SCATTER.map(d => d.revenue));\n\nconst svg = document.getElementById('scatter-svg');\nconst NS = 'http://www.w3.org/2000/svg';\nconst W = 760, H = 560;\nconst M = { left: 82, top: 46, right: 56, bottom: 82 };\nconst PW = W - M.left - M.right;\nconst PH = H - M.top - M.bottom;\n\nfunction clamp01(v) { return Math.max(0, Math.min(1, v)); }\nfunction xScale(v) { return M.left + ((v - VIS_MIN) / (VIS_MAX - VIS_MIN)) * PW; }\nfunction yScale(v) { return M.top + (1 - ((v - SPEND_MIN) / (SPEND_MAX - SPEND_MIN))) * PH; }\nfunction rScale(v) { return 8 + (v / maxRev) * 23; }\nfunction posForSpending(v) { return clamp01((v - BAR_MIN) / (BAR_MAX - BAR_MIN)) * 100; }\nfunction fmtPct(value) { return (value >= 0 ? '+' : '') + Math.round(value) + '%'; }\n\nfunction el(tag, attrs = {}, parent = svg) {\n  const node = document.createElementNS(NS, tag);\n  Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));\n  parent.appendChild(node);\n  return node;\n}\n\nfunction line(x1, y1, x2, y2, cls, parent = svg) {\n  return el('line', { x1, y1, x2, y2, class: cls }, parent);\n}\n\nfunction buildChart() {\n  svg.innerHTML = '';\n\n  el('rect', { x: 0, y: 0, width: W, height: H, fill: 'transparent' });\n\n  const xTicks = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];\n  const yTicks = [800, 1050, 1300, 1550, 1800, 2050];\n\n  xTicks.forEach(t => {\n    const x = xScale(t);\n    line(x, M.top, x, M.top + PH, 'grid-line');\n    const txt = el('text', { x, y: M.top + PH + 28, class: 'tick-label', 'text-anchor': 'middle' });\n    txt.textContent = t + 'M';\n  });\n\n  yTicks.forEach(t => {\n    const y = yScale(t);\n    line(M.left, y, M.left + PW, y, 'grid-line');\n    const txt = el('text', { x: M.left - 14, y: y + 4, class: 'tick-label', 'text-anchor': 'end' });\n    txt.textContent = 'USD ' + t;\n  });\n\n  line(M.left, M.top + PH, M.left + PW, M.top + PH, 'axis-line');\n  line(M.left, M.top, M.left, M.top + PH, 'axis-line');\n\n  const avgY = yScale(AVG_SPENDING);\n  line(M.left, avgY, M.left + PW, avgY, 'avg-line');\n  const avgLabel = el('text', { x: M.left + PW - 8, y: avgY - 10, class: 'avg-label', 'text-anchor': 'end' });\n  avgLabel.textContent = 'Promedio gasto/turista';\n\n  const xLabel = el('text', { x: M.left + PW / 2, y: H - 22, class: 'axis-label', 'text-anchor': 'middle' });\n  xLabel.textContent = 'Visitantes internacionales 2019 (millones)';\n\n  const yLabel = el('text', {\n    x: 22,\n    y: M.top + PH / 2,\n    class: 'axis-label',\n    'text-anchor': 'middle',\n    transform: `rotate(-90 22 ${M.top + PH / 2})`\n  });\n  yLabel.textContent = 'Gasto promedio por turista (USD)';\n\n  const bubbleLayer = el('g', { id: 'bubble-layer' });\n  SCATTER.forEach((d, i) => {\n    const x = xScale(d.visitors);\n    const y = yScale(d.spending);\n    const r = rScale(d.revenue);\n    // Grupo externo: fija la posición real (x,y) dentro del gráfico.\n    // Grupo interno: recibe la animación de aparición sin pisar la posición SVG.\n    const posG = el('g', { class: 'bubble-position', transform: `translate(${x},${y})` }, bubbleLayer);\n    const g = el('g', { class: 'bubble-group', id: `bubble-${i}`, 'data-index': i }, posG);\n    // Círculo invisible: mantiene cómoda el área de hover aunque la burbuja visual sea más chica.\n    el('circle', { class: 'bubble-hit', cx: 0, cy: 0, r: Math.max(r + 12, 30) }, g);\n    el('circle', { class: 'bubble-ring', cx: 0, cy: 0, r: r + 5, stroke: d.color, opacity: 0.42 }, g);\n    el('circle', { class: 'bubble-fill', cx: 0, cy: 0, r, fill: d.color + '55', stroke: d.color, opacity: 0.70 }, g);\n    const label = el('text', { class: 'bubble-label', x: 0, y: -r - 10, fill: d.color }, g);\n    label.textContent = d.name;\n    g.addEventListener('mouseenter', () => { if (i < visibleCount) setActive(i, 'hover'); });\n    g.addEventListener('focus', () => { if (i < visibleCount) setActive(i, 'hover'); });\n    g.addEventListener('click', () => { if (i < visibleCount) setActive(i, 'hover'); });\n    g.setAttribute('tabindex', '0');\n  });\n}\n\nconst panel = document.getElementById('side-panel');\nconst panelKicker = document.getElementById('panel-kicker');\nconst panelTitle = document.getElementById('panel-title');\nconst panelCountry = document.getElementById('panel-country');\nconst panelVisitors = document.getElementById('panel-visitors');\nconst panelSpending = document.getElementById('panel-spending');\nconst panelRevenue = document.getElementById('panel-revenue');\nconst avgFill = document.getElementById('avg-fill');\nconst avgMarker = document.getElementById('avg-marker');\nconst avgValue = document.getElementById('avg-value');\nconst avgText = document.getElementById('avg-text');\nconst panelNote = document.getElementById('panel-note');\nconst revealText = document.getElementById('reveal-text');\nconst scrollHint = document.getElementById('scroll-hint');\nconst revealDotsEl = document.getElementById('reveal-dots');\n\nlet visibleCount = 0;\nlet activeIndex = 0;\nlet hoverMode = false;\n\nSCATTER.forEach((d, i) => {\n  const dot = document.createElement('span');\n  dot.className = 'reveal-dot';\n  dot.style.setProperty('--dot-color', d.color);\n  dot.dataset.index = i;\n  revealDotsEl.appendChild(dot);\n});\nconst revealDots = [...revealDotsEl.children];\n\nfunction setRevealDots(count) {\n  revealDots.forEach((dot, i) => dot.classList.toggle('on', i < count));\n  revealText.textContent = `${count} de ${SCATTER.length} destinos visibles`;\n}\n\nfunction showCity(index, mode = 'scroll') {\n  const d = SCATTER[index];\n  if (!d) return;\n  panel.style.setProperty('--active-color', d.color);\n  panel.style.borderColor = d.color + '88';\n  panelKicker.textContent = mode === 'hover' ? 'Destino seleccionado' : 'Último destino incorporado';\n  panelTitle.textContent = d.name;\n  panelCountry.textContent = d.country;\n  panelVisitors.textContent = d.visitors.toFixed(1) + 'M';\n  panelSpending.textContent = 'USD ' + d.spending;\n  panelRevenue.textContent = 'USD ' + d.revenue.toFixed(1) + 'B';\n  avgValue.textContent = AVG_SPENDING;\n  avgFill.style.setProperty('--fill-w', posForSpending(d.spending).toFixed(1) + '%');\n  avgMarker.style.setProperty('--avg-x', posForSpending(AVG_SPENDING).toFixed(1) + '%');\n  const diff = ((d.spending - AVG_SPENDING) / AVG_SPENDING) * 100;\n  avgText.textContent = `${fmtPct(diff)} ${diff >= 0 ? 'sobre' : 'por debajo del'} promedio.`;\n  panelNote.textContent = d.note;\n  panel.classList.add('in');\n}\n\nfunction setActive(index, mode = 'scroll') {\n  if (index == null || index < 0 || index >= SCATTER.length) return;\n  activeIndex = index;\n  hoverMode = mode === 'hover';\n  document.querySelectorAll('.bubble-group').forEach((g, i) => {\n    g.classList.toggle('active', i === activeIndex && i < visibleCount);\n  });\n  showCity(activeIndex, mode);\n}\n\nfunction setVisibleCount(count) {\n  const next = Math.max(0, Math.min(SCATTER.length, count));\n  if (next === visibleCount) return;\n  visibleCount = next;\n  SCATTER.forEach((_, i) => {\n    const g = document.getElementById(`bubble-${i}`);\n    if (g) g.classList.toggle('visible', i < visibleCount);\n  });\n  setRevealDots(visibleCount);\n  if (visibleCount > 0 && (!hoverMode || activeIndex >= visibleCount)) {\n    setActive(visibleCount - 1, 'scroll');\n  }\n}\n\nbuildChart();\nsetRevealDots(0);\nshowCity(0, 'scroll');\n\ndocument.getElementById('scatter-svg').addEventListener('mouseleave', () => {\n  hoverMode = false;\n  if (visibleCount > 0) setActive(visibleCount - 1, 'scroll');\n});\n\nconst titleCard = document.getElementById('title-card');\nconst chartBox = document.getElementById('scatter-box');\nconst titleObserver = new IntersectionObserver((entries) => {\n  entries.forEach(entry => {\n    if (entry.isIntersecting) titleCard.classList.add('in');\n  });\n}, { threshold: 0.15 });\ntitleObserver.observe(titleCard);\n\nconst boxObserver = new IntersectionObserver((entries) => {\n  entries.forEach(entry => {\n    if (entry.isIntersecting) chartBox.classList.add('in');\n  });\n}, { threshold: 0.10 });\nboxObserver.observe(chartBox);\n\nconst journey = document.getElementById('scatter-story');\nfunction onScroll() {\n  const denom = document.body.scrollHeight - innerHeight;\n  const pct = denom > 0 ? window.scrollY / denom * 100 : 0;\n  document.getElementById('progress').style.width = pct + '%';\n\n  const rect = journey.getBoundingClientRect();\n  const total = journey.offsetHeight - innerHeight;\n  const scrolled = Math.min(Math.max(-rect.top, 0), total);\n  const p = total > 0 ? scrolled / total : 0;\n\n  if (p > 0.015) chartBox.classList.add('in');\n\n  const introHold = 0.05;\n  const revealSpan = 0.78;\n  let nextCount = 0;\n  if (p > introHold) {\n    const rp = Math.min(1, (p - introHold) / revealSpan);\n    nextCount = Math.min(SCATTER.length, Math.max(1, Math.floor(rp * SCATTER.length) + 1));\n  }\n\n  setVisibleCount(nextCount);\n  if (visibleCount > 0 && !hoverMode) setActive(visibleCount - 1, 'scroll');\n  scrollHint.style.opacity = p < 0.92 ? String(Math.max(0, 0.82 - p * 0.65)) : '0';\n}\n\nlet ticking = false;\nwindow.addEventListener('scroll', () => {\n  if (!ticking) {\n    requestAnimationFrame(() => { onScroll(); ticking = false; });\n    ticking = true;\n  }\n}, { passive: true });\n\nwindow.addEventListener('resize', onScroll);\nonScroll();\n<\/script>\n<\/body>\n<\/html>\n"};
+
+  function scopedCss(css) {
+    return css
+      .replace(/:root/g, ':host')
+      .replace(/(^|})\s*html\s*\{/g, '$1\n:host {')
+      .replace(/(^|})\s*body\s*\{/g, '$1\n:host {')
+      + '\n:host { display:block; width:100%; color: var(--text, #F4F7FB); font-family: Inter, system-ui, sans-serif; }\n'
+      + ':host #progress { display:none !important; }\n';
+  }
+
+  function patchScript(code) {
+    return code
+      // D3 no busca dentro de Shadow DOM cuando recibe un selector string.
+      .replace(/d3\.select\(['"]#journey-svg['"]\)/g, "d3.select(root.getElementById('journey-svg'))");
+  }
+
+  function makeScopedDocument(root, host) {
+    return new Proxy(document, {
+      get(target, prop) {
+        if (prop === 'getElementById') return (id) => root.getElementById(id);
+        if (prop === 'querySelector') return (selector) => root.querySelector(selector);
+        if (prop === 'querySelectorAll') return (selector) => root.querySelectorAll(selector);
+        if (prop === 'documentElement') return host;
+        if (prop === 'body') return document.body;
+        if (prop === 'head') return document.head;
+        const value = target[prop];
+        return typeof value === 'function' ? value.bind(target) : value;
+      }
+    });
+  }
+
+  function mountModule(hostId, html) {
+    const host = document.getElementById(hostId);
+    if (!host || !html) return;
+
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const styles = Array.from(parsed.querySelectorAll('style')).map(s => s.textContent).join('\n\n');
+    const scripts = Array.from(parsed.querySelectorAll('script'))
+      .filter(s => !s.src && s.textContent.trim())
+      .map(s => s.textContent);
+
+    parsed.querySelectorAll('script').forEach(s => s.remove());
+    parsed.querySelectorAll('link[rel="preconnect"], link[rel="stylesheet"]').forEach(l => l.remove());
+
+    const root = host.attachShadow({ mode: 'open' });
+    root.innerHTML = `<style>${scopedCss(styles)}</style>` + parsed.body.innerHTML;
+
+    const scopedDocument = makeScopedDocument(root, host);
+    scripts.forEach((rawCode) => {
+      const code = patchScript(rawCode);
+      try {
+        new Function('document', 'window', 'root', 'host', 'd3', 'topojson', 'Chart', code)(
+          scopedDocument, window, root, host, window.d3, window.topojson, window.Chart
+        );
+      } catch (error) {
+        console.error('Error montando módulo corregido:', hostId, error);
+      }
+    });
+  }
+
+  mountModule('s-map', MODULE_HTML.mapa);
+  mountModule('s-ranking', MODULE_HTML.ranking);
+  mountModule('s-timeline', MODULE_HTML.lineas);
+  mountModule('s-scatter', MODULE_HTML.scatter);
+})();
+</script>
+
+</body>
+</html>
